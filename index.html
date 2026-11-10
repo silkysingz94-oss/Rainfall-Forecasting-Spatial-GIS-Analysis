@@ -1,5 +1,6 @@
 
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,108 +9,45 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 <style>
-:root{
- --navy:#071d36;
- --blue:#0759a6;
- --red:#d62828;
- --green:#16834a;
- --orange:#e9a323;
- --bg:#edf2f7;
- --border:#dce4ed;
- --text:#172b42;
-}
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{
- background:linear-gradient(110deg,#071d36,#0759a6);
- color:white;padding:17px 20px;border-bottom:5px solid var(--green)
-}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.brand{font-size:20px;font-weight:800;letter-spacing:.5px}
-.subtitle{font-size:11px;color:#dce9f6;margin-top:5px}
-.header-tag{font-size:10px;border:1px solid #ffffff70;padding:8px 10px;border-radius:4px}
-.statusbar{
- display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;
- background:white;padding:9px 15px;font-size:11px;border-bottom:1px solid var(--border)
-}
-.status{display:flex;align-items:center;gap:7px}
-.dot{height:8px;width:8px;border-radius:50%;background:#d69b20}
-.dot.ok{background:var(--green)}
-.dot.bad{background:var(--red)}
-.dashboard{
- display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px;
- padding:12px;height:calc(100vh - 115px);min-height:680px
-}
-.panel{
- background:white;border:1px solid var(--border);border-radius:7px;
- overflow:hidden;display:flex;flex-direction:column;min-width:0
-}
-.panel-title{background:var(--navy);color:white;font-size:12px;font-weight:bold;padding:13px}
-.panel-body{padding:13px;overflow-y:auto;flex:1}
-.section{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid #e8edf2}
-.section h3{font-size:11px;color:var(--blue);margin:0 0 10px;text-transform:uppercase;letter-spacing:.5px}
-label{display:block;font-size:11px;font-weight:bold;margin:9px 0 5px}
-select,input[type=date]{
- width:100%;padding:9px;border:1px solid #cbd6e1;border-radius:4px;
- background:white;font-size:12px;color:var(--text)
-}
-input[type=checkbox]{width:auto;margin-right:6px}
-button{border:0;border-radius:4px;padding:10px 11px;font-weight:bold;font-size:11px;cursor:pointer}
-button:disabled{opacity:.45;cursor:not-allowed}
-.primary{background:var(--blue);color:white}
-.green{background:var(--green);color:white}
-.light{background:#eaf0f6;color:#183c5d}
-.btnrow{display:flex;gap:7px;margin-top:10px}
-.btnrow button{flex:1}
-.help{font-size:10px;line-height:1.5;color:#64748b;margin-top:7px}
-#map{width:100%;height:100%;min-height:450px}
-.map-wrap{position:relative;flex:1;min-height:0}
-.map-label{
- position:absolute;z-index:500;top:10px;left:10px;background:white;
- padding:8px 10px;border-radius:4px;font-size:10px;box-shadow:0 1px 6px #0002
-}
-.legend{
- position:absolute;z-index:500;bottom:15px;left:10px;background:white;
- padding:9px 11px;border-radius:4px;font-size:10px;line-height:1.8;
- box-shadow:0 1px 6px #0002
-}
-.legend i{display:inline-block;width:17px;height:3px;margin-right:6px;vertical-align:middle}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:13px}
-.kpi{background:#f2f6fa;border:1px solid #e1e8ef;border-radius:5px;padding:10px}
-.kpi-label{font-size:10px;color:#63768a}
-.kpi-value{font-size:19px;font-weight:800;color:var(--blue);margin-top:5px}
-.kpi-unit{font-size:9px;color:#718399}
-.chartbox{height:210px;margin:10px 0 16px;position:relative}
-.chartbox.small{height:185px}
-.message{
- font-size:10px;line-height:1.5;background:#f0f5fa;border-left:3px solid var(--blue);
- padding:9px;margin:10px 0;overflow-wrap:anywhere
-}
-.message.good{background:#eef9f1;border-color:var(--green)}
-.message.bad{background:#fff1f1;border-color:var(--red);color:#9b2222}
-.progress{display:none;margin-top:10px}
-.progress-bg{height:8px;background:#e5ebf1;border-radius:8px;overflow:hidden}
-.progress-fill{height:100%;width:0;background:var(--green);transition:width .2s}
-#progressText{font-size:10px;color:#64748b;margin-top:5px}
-table{width:100%;border-collapse:collapse;font-size:10px}
-th,td{padding:7px;text-align:left;border-bottom:1px solid #e7edf3}
-th{background:#f0f4f8}
-.table-wrap{max-height:230px;overflow:auto}
-footer{background:var(--navy);color:#dce7f1;text-align:center;padding:12px;font-size:10px;line-height:1.7}
-@media(max-width:1050px){
- .dashboard{grid-template-columns:1fr 1fr;height:auto}
- .map-panel{grid-column:1/-1;grid-row:1;min-height:530px}
- .panel{min-height:490px}
-}
-@media(max-width:650px){
- .dashboard{display:flex;flex-direction:column}
- .panel{min-height:450px}
- .map-panel{min-height:510px}
- #map{min-height:420px}
+body{margin:0;font-family:Arial,sans-serif;background:#edf2f7;color:#172033}
+header{padding:5px;background:linear-gradient(90deg,#c4161c 25%,white 25% 50%,#185abd 50% 75%,#16803b 75%)}
+.banner{background:#10213c;color:white;text-align:center;padding:17px}
+.banner h2{margin:0 0 7px;font-size:21px}
+.banner p{margin:0;color:#dbeafe;font-size:12px}
+.layout{display:grid;grid-template-columns:300px minmax(300px,1fr) 330px;gap:10px;padding:10px;height:calc(100vh - 102px);min-height:650px}
+.panel{background:white;border:1px solid #dce4ed;border-radius:9px;padding:13px;overflow:auto;min-height:0}
+.map-panel{padding:5px;position:relative;overflow:hidden}
+#map{height:100%;width:100%;min-height:400px;border-radius:6px}
+h3{font-size:14px;color:#173c65;margin:5px 0 12px}
+h4{font-size:12px;color:#334155;margin:12px 0 6px}
+label{font-size:11px;font-weight:bold;display:block;margin:12px 0 5px}
+select,input{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:5px;background:white;font-size:12px}
+button{width:100%;border:0;border-radius:5px;padding:10px;margin-top:7px;background:#1d4ed8;color:white;font-weight:bold;font-size:12px;cursor:pointer}
+button:disabled{background:#94a3b8;cursor:not-allowed}
+.green{background:#16803b}
+.dark{background:#334155}
+.red{background:#b91c1c}
+.status{background:#eff6ff;border-left:3px solid #2563eb;border-radius:4px;padding:10px;font-size:11px;line-height:1.6;overflow-wrap:anywhere;margin:9px 0}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.kpi{background:#f1f5f9;padding:11px;border-radius:6px}
+.kpi small{font-size:10px;color:#64748b}
+.kpi strong{display:block;font-size:19px;margin-top:5px;overflow-wrap:anywhere}
+.section{border-top:1px solid #e2e8f0;padding-top:12px;margin-top:15px}
+.note{font-size:10px;line-height:1.6;color:#64748b}
+.progress{height:9px;background:#e2e8f0;border-radius:10px;overflow:hidden}
+#progressBar{height:100%;width:0;background:#16a34a;transition:width .3s}
+.chartbox{height:210px;margin-top:10px}
+footer{text-align:center;padding:8px;color:#64748b;font-size:10px}
+@media(max-width:1000px){
+ .layout{height:auto;grid-template-columns:1fr}
+ .panel{max-height:none}
+ #map{height:500px}
+ .map-panel{height:510px}
 }
 </style>
 </head>
@@ -117,1298 +55,1138 @@ footer{background:var(--navy);color:#dce7f1;text-align:center;padding:12px;font-
 <body>
 
 <header>
- <div class="header">
-  <div>
-   <div class="brand">SILKYSINGZ GEOAI | GAMBIA RAINFALL INTELLIGENCE</div>
-   <div class="subtitle">CHIRPS Rainfall Analysis • Census EA Boundaries • Spatial GIS • Seasonal Monitoring</div>
-  </div>
-  <div class="header-tag">GAMBIA BUREAU OF STATISTICS | GIS / CARTOGRAPHY UNIT</div>
- </div>
+<div class="banner">
+<h2>GBoS GEOAI | GAMBIA RAINFALL INTELLIGENCE</h2>
+<p>CHIRPS Rainfall Monitoring • Spatial Distribution • Administrative Analysis • Forecasting</p>
+</div>
 </header>
 
-<div class="statusbar">
- <div class="status">
-  <span class="dot" id="boundaryDot"></span>
-  <span id="boundaryStatus">Loading Census EA boundaries...</span>
- </div>
- <div class="status">
-  <span class="dot" id="rainDot"></span>
-  <span id="rainStatus">Rainfall analysis not started</span>
- </div>
- <div id="clock"></div>
+<div class="layout">
+
+<!-- LEFT: CONTROLS -->
+<section class="panel">
+
+<h3>01 | Administrative Selection</h3>
+
+<label>Region</label>
+<select id="region"><option value="">All Regions</option></select>
+
+<label>District</label>
+<select id="district"><option value="">All Districts</option></select>
+
+<label>Ward</label>
+<select id="ward"><option value="">All Wards</option></select>
+
+<label>Enumeration Area</label>
+<select id="ea"><option value="">All Enumeration Areas</option></select>
+
+<div class="section">
+<h3>02 | Rainfall Parameters</h3>
+
+<label>Dataset</label>
+<select id="dataset">
+<option value="0">CHIRPS Daily</option>
+</select>
+
+<label>Start date</label>
+<input type="date" id="startDate" value="2026-08-01">
+
+<label>End date</label>
+<input type="date" id="endDate" value="2026-08-31">
+
+<label>Statistical operation</label>
+<select id="operation">
+<option value="5">Average rainfall</option>
+<option value="0">Maximum rainfall</option>
+<option value="1">Minimum rainfall</option>
+<option value="2">Median rainfall</option>
+<option value="3">Rainfall range</option>
+<option value="4">Total rainfall</option>
+</select>
+
+<label>Temporal interval</label>
+<select id="interval">
+<option value="0">Daily</option>
+</select>
+
+<button id="runButton" onclick="runRainfall()">SUBMIT CHIRPS REQUEST</button>
+<button class="dark" onclick="resetDashboard()">RESET</button>
+
 </div>
 
-<main class="dashboard">
+<div class="section">
+<h3>03 | Processing Progress</h3>
+<div class="progress"><div id="progressBar"></div></div>
+<p id="progressText" class="note">Waiting for request.</p>
+<div id="status" class="status">Loading administrative boundaries...</div>
+</div>
 
-<!-- LEFT PANEL -->
-<section class="panel">
- <div class="panel-title">CONTROLS | ADMINISTRATIVE SELECTION</div>
- <div class="panel-body">
+<div class="section">
+<h3>04 | Basemap</h3>
+<select id="basemap">
+<option value="street">Street</option>
+<option value="satellite">Satellite</option>
+<option value="terrain">Terrain</option>
+</select>
+</div>
 
-  <div class="section">
-   <h3>Administrative hierarchy</h3>
-
-   <label for="region">Region / Local Government Area</label>
-   <select id="region" disabled>
-    <option value="">Loading regions...</option>
-   </select>
-
-   <label for="district">District</label>
-   <select id="district" disabled>
-    <option value="">Select a region first</option>
-   </select>
-
-   <label for="ward">Ward</label>
-   <select id="ward" disabled>
-    <option value="">Select a district first</option>
-   </select>
-
-   <div class="btnrow">
-    <button class="light" id="zoomBtn">Zoom to area</button>
-    <button class="light" id="resetBtn">Reset</button>
-   </div>
-
-   <div class="help">
-    Administrative units are derived directly from your Census_EAs_Geo.json.
-    Selecting a ward filters its constituent enumeration areas.
-   </div>
-  </div>
-
-  <div class="section">
-   <h3>Rainfall period</h3>
-   <label for="startDate">Start date</label>
-   <input type="date" id="startDate" value="2025-01-01">
-
-   <label for="endDate">End date</label>
-   <input type="date" id="endDate" value="2025-12-31">
-
-   <div class="help">
-    CHIRPS daily rainfall estimates. ClimateSERV supports a maximum
-    20-year period per request.
-   </div>
-  </div>
-
-  <div class="section">
-   <h3>Map configuration</h3>
-   <label for="basemap">Basemap</label>
-   <select id="basemap">
-    <option value="street">Road map</option>
-    <option value="satellite">Satellite</option>
-    <option value="hybrid">Hybrid</option>
-    <option value="terrain">Terrain</option>
-   </select>
-
-   <label><input type="checkbox" id="showEA" checked>Show enumeration areas</label>
-   <label><input type="checkbox" id="showOutline" checked>Show selected boundary</label>
-  </div>
-
-  <div class="section">
-   <h3>Rainfall processing</h3>
-   <button class="green" id="runBtn" style="width:100%">RUN CHIRPS ANALYSIS</button>
-
-   <div class="progress" id="progress">
-    <div class="progress-bg">
-     <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div id="progressText">Preparing...</div>
-   </div>
-
-   <div class="message" id="message">
-    Load the Census EA boundaries, select an area and run the rainfall analysis.
-   </div>
-  </div>
-
-  <div class="section">
-   <h3>Export</h3>
-   <div class="btnrow">
-    <button class="primary" id="csvBtn" disabled>Export rainfall CSV</button>
-    <button class="light" id="geoBtn" disabled>Export boundary</button>
-   </div>
-   <div class="btnrow">
-    <button class="light" id="eaCsvBtn" disabled>Export EA attributes</button>
-   </div>
-  </div>
-
-  <div class="help">
-   Administrative source: Census_EAs_Geo.json in the Rainfall-Forecasting-Spatial-GIS-Analysis
-   GitHub repository. Rainfall source: UCSB CHIRPS through ClimateSERV.
-  </div>
- </div>
 </section>
 
-<!-- MAP PANEL -->
+<!-- CENTRE: MAP -->
 <section class="panel map-panel">
- <div class="panel-title">INTERACTIVE MAP | GAMBIA CENSUS ENUMERATION AREAS</div>
- <div class="map-wrap">
-  <div id="map"></div>
-  <div class="map-label" id="mapLabel">The Gambia | Census EA boundaries</div>
-  <div class="legend">
-   <div><i style="background:#0759a6"></i>Enumeration areas</div>
-   <div><i style="background:#e9a323"></i>Selected area</div>
-  </div>
- </div>
+<div id="map"></div>
 </section>
 
-<!-- ANALYTICS PANEL -->
+<!-- RIGHT: ANALYTICS -->
 <section class="panel">
- <div class="panel-title">ANALYTICS | RAINFALL INTELLIGENCE</div>
- <div class="panel-body">
 
-  <div class="message" id="selectedArea">Selected area: The Gambia</div>
+<h3>05 | Rainfall Analytics</h3>
 
-  <div class="kpis">
-   <div class="kpi">
-    <div class="kpi-label">Total rainfall</div>
-    <div class="kpi-value" id="totalRain">—</div>
-    <div class="kpi-unit">mm</div>
-   </div>
-   <div class="kpi">
-    <div class="kpi-label">Daily average</div>
-    <div class="kpi-value" id="meanRain">—</div>
-    <div class="kpi-unit">mm/day</div>
-   </div>
-   <div class="kpi">
-    <div class="kpi-label">Highest daily value</div>
-    <div class="kpi-value" id="maxRain">—</div>
-    <div class="kpi-unit">mm/day</div>
-   </div>
-   <div class="kpi">
-    <div class="kpi-label">Daily records</div>
-    <div class="kpi-value" id="recordCount">—</div>
-    <div class="kpi-unit">observations</div>
-   </div>
-  </div>
+<div class="kpis">
+<div class="kpi">
+<small>Selected EAs</small>
+<strong id="eaCount">0</strong>
+</div>
+<div class="kpi">
+<small>Observations</small>
+<strong id="recordCount">0</strong>
+</div>
+<div class="kpi">
+<small>Mean (mm)</small>
+<strong id="mean">N/A</strong>
+</div>
+<div class="kpi">
+<small>Minimum (mm)</small>
+<strong id="minimum">N/A</strong>
+</div>
+<div class="kpi">
+<small>Maximum (mm)</small>
+<strong id="maximum">N/A</strong>
+</div>
+<div class="kpi">
+<small>Total (mm)</small>
+<strong id="total">N/A</strong>
+</div>
+</div>
 
-  <div class="section">
-   <h3>Daily rainfall time series</h3>
-   <div class="chartbox"><canvas id="dailyChart"></canvas></div>
-  </div>
+<div class="section">
+<h3>06 | Rainfall Time Series</h3>
+<div class="chartbox">
+<canvas id="rainChart"></canvas>
+</div>
+</div>
 
-  <div class="section">
-   <h3>Monthly rainfall accumulation</h3>
-   <div class="chartbox small"><canvas id="monthlyChart"></canvas></div>
-  </div>
+<div class="section">
+<h3>07 | Data Export Centre</h3>
 
-  <div class="section">
-   <h3>Monthly rainfall table</h3>
-   <div class="table-wrap">
-    <table>
-     <thead>
-      <tr><th>Month</th><th>Total mm</th><th>Records</th></tr>
-     </thead>
-     <tbody id="monthlyTable">
-      <tr><td colspan="3">No results yet</td></tr>
-     </tbody>
-    </table>
-   </div>
-  </div>
+<button class="green" id="csvButton" onclick="exportCSV()" disabled>
+EXPORT RAINFALL CSV
+</button>
 
-  <div class="section">
-   <h3>Methodology</h3>
-   <div class="help" style="font-size:11px">
-    <b>Administrative units:</b> Census enumeration area polygons
-    from the supplied GitHub GeoJSON.<br><br>
-    <b>Rainfall dataset:</b> UCSB CHIRPS daily precipitation,
-    ClimateSERV datatype 0.<br><br>
-    <b>Spatial statistic:</b> Daily area-average rainfall for the
-    selected polygon geometry.<br><br>
-    <b>Accumulation:</b> Sum of daily area-average rainfall values
-    for the selected period.<br><br>
-    <b>Units:</b> Millimetres (mm).<br><br>
-    <b>Important:</b> CHIRPS is a rainfall estimation product,
-    not a direct rain-gauge observation at every location.
-    Historical rainfall analysis is not a future forecast.
-   </div>
-  </div>
+<button class="green" id="excelButton" onclick="exportExcel()" disabled>
+EXPORT EXCEL CSV
+</button>
 
- </div>
+<button class="green" onclick="exportGeoJSON()">
+EXPORT SELECTED EA GEOJSON
+</button>
+
+<button class="green" onclick="exportPNG()">
+EXPORT MAP PNG
+</button>
+
+<button class="dark" onclick="exportLog()">
+EXPORT REQUEST LOG
+</button>
+
+<p class="note">
+Rainfall exports are enabled only after genuine ClimateSERV observations have been retrieved and validated.
+</p>
+</div>
+
+<div class="section">
+<h3>08 | Data Information</h3>
+<p class="note">
+Dataset: UCSB CHIRPS Daily<br>
+Datatype: 0<br>
+Resolution: approximately 0.05 degrees<br>
+Units: millimetres<br>
+Statistical operation: user selected<br>
+Spatial reference: WGS84 / EPSG:4326<br>
+Processing: ClimateSERV API
+</p>
+</div>
+
+<div class="section">
+<h3>09 | Methodology</h3>
+<p class="note">
+The dashboard submits the selected administrative geometry to ClimateSERV. The processing service calculates the requested statistic for the selected combined area and returns a time series. The resulting time series is not a separate rainfall estimate for each EA.
+</p>
+</div>
+
+<div class="section">
+<h3>10 | Credits</h3>
+<p class="note">
+Produced by Ansu Singhateh<br>
+GIS Analyst | GIS / Cartography Unit<br>
+Gambia Bureau of Statistics<br>
+GBoS GEOAI • Research and educational use
+</p>
+</div>
+
 </section>
-
-</main>
+</div>
 
 <footer>
- Produced by Ansu Singhateh | GIS Analyst | GIS / Cartography Unit |
- Gambia Bureau of Statistics<br>
- GBoS GEOAI • Research and educational use
+Gambia Bureau of Statistics | GIS / Cartography Unit | GBoS GEOAI
 </footer>
 
 <script>
-"use strict";
 
-/* ============================================================
-   1. DATA SOURCES
-   ============================================================ */
+// ======================================================
+// 1. CONFIGURATION
+// ======================================================
 
-const EA_GEOJSON_URL =
- "https://raw.githubusercontent.com/silkysingz94-oss/Rainfall-Forecasting-Spatial-GIS-Analysis/main/Census_EAs_Geo.json";
+const BOUNDARY_URL =
+"https://raw.githubusercontent.com/silkysingz94-oss/Rainfall-Forecasting-Spatial-GIS-Analysis/main/Census_EAs_Geo.json";
 
-const CLIMATE_API =
- "https://climateserv.servirglobal.net/api/";
+const API =
+"https://climateserv.servirglobal.net/api/";
 
-const state = {
- allEAs: [],
- selectedEAs: [],
- selectedRegion: "",
- selectedDistrict: "",
- selectedWard: "",
- selectedFeatures: [],
- selectedGeometry: null,
- eaLayer: null,
- outlineLayer: null,
- rainfall: [],
- dailyChart: null,
- monthlyChart: null,
- busy: false
-};
+let boundaries=null;
+let selectedFeatures=[];
+let rainfallRecords=[];
+let requestLog=[];
+let currentJob=null;
+let chart=null;
+let busy=false;
 
-const $ = id => document.getElementById(id);
+const map=L.map("map").setView([13.45,-15.45],8);
 
-function setStatus(text,dot,type=""){
- $(text).textContent = text === "boundaryStatus"
-  ? $("boundaryStatus").textContent : $(text).textContent;
-}
-
-function status(id,dotId,text,type=""){
- $(id).textContent = text;
- $(dotId).className = "dot " + type;
-}
-
-function showMessage(text,type=""){
- $("message").className = "message " + type;
- $("message").textContent = text;
-}
-
-function updateClock(){
- $("clock").textContent = new Date().toLocaleString();
-}
-updateClock();
-setInterval(updateClock,1000);
-
-/* ============================================================
-   2. MAP
-   ============================================================ */
-
-const gambiaBounds = L.latLngBounds(
- [[13.0,-17.1],[13.9,-13.7]]
-);
-
-const map = L.map("map",{
- preferCanvas:true,
- zoomControl:true
-}).setView([13.45,-15.5],8);
-
-const baseLayers = {
+const baseLayers={
  street:L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {maxZoom:19,attribution:"© OpenStreetMap"}
+  {attribution:"© OpenStreetMap"}
  ),
  satellite:L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {maxZoom:19,attribution:"Tiles © Esri"}
+  "https://server.arcgis.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {attribution:"Esri"}
  ),
- hybrid:L.layerGroup([
-  L.tileLayer(
-   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-   {maxZoom:19}
-  ),
-  L.tileLayer(
-   "https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png",
-   {maxZoom:19}
-  )
- ]),
  terrain:L.tileLayer(
   "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-  {maxZoom:17,attribution:"© OpenTopoMap"}
+  {attribution:"OpenTopoMap"}
  )
 };
 
-let activeBase = baseLayers.street.addTo(map);
+baseLayers.street.addTo(map);
 
-$("basemap").addEventListener("change",()=>{
- map.removeLayer(activeBase);
- activeBase = baseLayers[$("basemap").value];
- activeBase.addTo(map);
+document.getElementById("basemap").addEventListener("change",e=>{
+ Object.values(baseLayers).forEach(l=>map.removeLayer(l));
+ baseLayers[e.target.value].addTo(map);
 });
 
-/* ============================================================
-   3. READ CENSUS EA GEOJSON
-   ============================================================ */
+// ======================================================
+// 2. GENERAL FUNCTIONS
+// ======================================================
 
-function getProperty(feature,names){
- const p = feature.properties || {};
- const keys = Object.keys(p);
-
- for(const name of names){
-  if(p[name] !== undefined && p[name] !== null &&
-     String(p[name]).trim() !== ""){
-   return String(p[name]).trim();
-  }
-
-  const match = keys.find(k =>
-   k.toLowerCase() === name.toLowerCase()
-  );
-
-  if(match && p[match] !== null &&
-     String(p[match]).trim() !== ""){
-   return String(p[match]).trim();
-  }
- }
-
- return "";
+function status(message){
+ document.getElementById("status").textContent=message;
 }
 
-function getRegion(f){
- return getProperty(f,["lganame","LGAName","region","regionname","RCO"]);
-}
-
-function getDistrict(f){
- return getProperty(f,["distname","district","districtname"]);
-}
-
-function getWard(f){
- return getProperty(f,["wardname","ward","ward_name"]);
-}
-
-function getEAName(f){
- return getProperty(f,["eaname","feacode","EA","EA_CODE","shapeName"]);
-}
-
-function uniqueSorted(values){
- return [...new Set(values.filter(Boolean))]
-  .sort((a,b)=>a.localeCompare(b));
-}
-
-function fillSelect(selectId,values,placeholder){
- const select = $(selectId);
- select.innerHTML = "";
-
- const first = document.createElement("option");
- first.value = "";
- first.textContent = placeholder;
- select.appendChild(first);
-
- values.forEach(value=>{
-  const option = document.createElement("option");
-  option.value = value;
-  option.textContent = value;
-  select.appendChild(option);
+function log(message,details={}){
+ requestLog.push({
+  timestamp:new Date().toISOString(),
+  message,
+  details
  });
 }
 
-async function loadCensusEAs(){
- try{
-  status(
-   "boundaryStatus","boundaryDot",
-   "Loading Census_EAs_Geo.json..."
-  );
+function progress(value,message){
+ document.getElementById("progressBar").style.width=
+ Math.max(0,Math.min(100,value))+"%";
 
-  const response = await fetch(EA_GEOJSON_URL,{
-   method:"GET",
-   mode:"cors",
+ document.getElementById("progressText").textContent=message;
+}
+
+function property(f,names){
+ const p=f.properties||{};
+ for(const n of names){
+  if(p[n]!==undefined&&p[n]!==null&&p[n]!==""){
+   return String(p[n]);
+  }
+ }
+ return "";
+}
+
+function regionOf(f){
+ return property(f,["RCO","rco","region","REGION","regionname"]);
+}
+
+function districtOf(f){
+ return property(f,["distname","DISTRICT","district"]);
+}
+
+function wardOf(f){
+ return property(f,["wardname","WARD","ward"]);
+}
+
+function eaOf(f){
+ return property(f,["feacode","FEACODE","eaname","EA","ea_code","ea"]);
+}
+
+function unique(features,fn){
+ return [...new Set(features.map(fn).filter(Boolean))].sort();
+}
+
+function populate(id,values,placeholder){
+ const el=document.getElementById(id);
+ const old=el.value;
+
+ el.innerHTML="";
+
+ const option=document.createElement("option");
+ option.value="";
+ option.textContent=placeholder;
+ el.appendChild(option);
+
+ values.forEach(v=>{
+  const o=document.createElement("option");
+  o.value=v;
+  o.textContent=v;
+  el.appendChild(o);
+ });
+
+ if(values.includes(old))el.value=old;
+}
+
+// ======================================================
+// 3. LOAD GAMBIA EA BOUNDARIES
+// ======================================================
+
+let boundaryLayer=null;
+
+async function loadBoundaries(){
+
+ try{
+
+  status("Downloading Census_EAs_Geo.json from GitHub...");
+
+  const response=await fetch(BOUNDARY_URL,{
    cache:"no-store"
   });
 
   if(!response.ok){
-   throw new Error(
-    "GitHub returned HTTP "+response.status+
-    ". Check that Census_EAs_Geo.json is in the main branch."
-   );
+   throw new Error("GitHub HTTP "+response.status);
   }
 
-  const geojson = await response.json();
+  boundaries=await response.json();
 
-  if(!geojson.features || !Array.isArray(geojson.features)){
-   throw new Error("The GitHub file is not a valid GeoJSON FeatureCollection.");
+  if(!boundaries.features||!boundaries.features.length){
+   throw new Error("No GeoJSON features found.");
   }
 
-  state.allEAs = geojson.features.filter(f=>
-   f.geometry &&
-   (f.geometry.type === "Polygon" ||
-    f.geometry.type === "MultiPolygon")
-  );
-
-  if(!state.allEAs.length){
-   throw new Error("No polygon features were found in the GeoJSON.");
-  }
-
-  const regions = uniqueSorted(state.allEAs.map(getRegion));
-  const districts = uniqueSorted(state.allEAs.map(getDistrict));
-  const wards = uniqueSorted(state.allEAs.map(getWard));
-
-  if(!regions.length || !districts.length || !wards.length){
-   const sample = state.allEAs[0].properties || {};
-   throw new Error(
-    "Required administrative fields were not detected. " +
-    "Available fields: "+Object.keys(sample).join(", ")
-   );
-  }
-
-  fillSelect("region",regions,"All regions");
-  fillSelect("district",districts,"All districts");
-  fillSelect("ward",wards,"All wards");
-
-  $("region").disabled = false;
-  $("district").disabled = false;
-  $("ward").disabled = false;
-
-  renderEAFeatures(state.allEAs);
-
-  status(
-   "boundaryStatus","boundaryDot",
-   "Census EA boundaries loaded: "+state.allEAs.length+
-   " EAs | "+regions.length+" regions | "+
-   districts.length+" districts | "+wards.length+" wards",
-   "ok"
-  );
-
-  $("geoBtn").disabled = false;
-  $("eaCsvBtn").disabled = false;
-
-  showMessage(
-   "Your Census_EAs_Geo.json loaded successfully. " +
-   "The administrative selectors are populated from its own attributes.",
-   "good"
-  );
-
- }catch(error){
-  console.error("Census EA loading error:",error);
-
-  status(
-   "boundaryStatus","boundaryDot",
-   "Census EA boundary loading failed",
-   "bad"
-  );
-
-  showMessage(
-   "Could not load Census_EAs_Geo.json. "+error.message+
-   " Open the repository file in GitHub and confirm that it is public and stored in the main branch.",
-   "bad"
-  );
- }
-}
-
-/* ============================================================
-   4. FILTER FEATURES USING ADMINISTRATIVE FIELDS
-   ============================================================ */
-
-function getFilteredEAs(){
- return state.allEAs.filter(feature=>{
-  const region = getRegion(feature);
-  const district = getDistrict(feature);
-  const ward = getWard(feature);
-
-  if(state.selectedRegion && region !== state.selectedRegion) return false;
-  if(state.selectedDistrict && district !== state.selectedDistrict) return false;
-  if(state.selectedWard && ward !== state.selectedWard) return false;
-
-  return true;
- });
-}
-
-function updateAdministrativeSelectors(){
- state.selectedRegion = $("region").value;
- state.selectedDistrict = "";
- state.selectedWard = "";
-
- const districtList = uniqueSorted(
-  state.allEAs
-   .filter(f=>!state.selectedRegion || getRegion(f)===state.selectedRegion)
-   .map(getDistrict)
- );
-
- const wardList = uniqueSorted(
-  state.allEAs
-   .filter(f=>!state.selectedRegion || getRegion(f)===state.selectedRegion)
-   .map(getWard)
- );
-
- fillSelect("district",districtList,"All districts");
- fillSelect("ward",wardList,"All wards");
-
- refreshSelection();
-}
-
-function updateDistrictSelection(){
- state.selectedDistrict = $("district").value;
- state.selectedWard = "";
-
- const filtered = state.allEAs.filter(f=>
-  (!state.selectedRegion || getRegion(f)===state.selectedRegion) &&
-  (!state.selectedDistrict || getDistrict(f)===state.selectedDistrict)
- );
-
- const wardList = uniqueSorted(filtered.map(getWard));
- fillSelect("ward",wardList,"All wards");
-
- refreshSelection();
-}
-
-function updateWardSelection(){
- state.selectedWard = $("ward").value;
- refreshSelection();
-}
-
-/* ============================================================
-   5. DRAW EA POLYGONS AND SELECTED AREA
-   ============================================================ */
-
-function renderEAFeatures(features){
- if(state.eaLayer){
-  map.removeLayer(state.eaLayer);
- }
-
- state.eaLayer = L.geoJSON({
-  type:"FeatureCollection",
-  features:features
- },{
-  style:{
-   color:"#0759a6",
-   weight:.6,
-   fillColor:"#6aa5d8",
-   fillOpacity:.07
-  },
-  onEachFeature:(feature,layer)=>{
-   const tip =
-    "EA: "+(getEAName(feature)||"Not specified")+
-    "<br>Region: "+getRegion(feature)+
-    "<br>District: "+getDistrict(feature)+
-    "<br>Ward: "+getWard(feature);
-
-   layer.bindTooltip(tip);
-  }
- });
-
- if($("showEA").checked){
-  state.eaLayer.addTo(map);
- }
-
- if(state.outlineLayer){
-  map.removeLayer(state.outlineLayer);
-  state.outlineLayer = null;
- }
-
- state.selectedEAs = features;
-
- if(features.length){
-  const outline = L.geoJSON({
-   type:"FeatureCollection",
-   features:features
-  },{
+  boundaryLayer=L.geoJSON(boundaries,{
    style:{
-    color:"#e9a323",
-    weight:2.5,
-    fillColor:"#e9a323",
-    fillOpacity:.04
+    color:"#2563eb",
+    weight:0.55,
+    fillColor:"#60a5fa",
+    fillOpacity:0.04
+   },
+   onEachFeature:(f,l)=>{
+    l.bindPopup(
+     "<b>EA:</b> "+eaOf(f)+
+     "<br><b>Region:</b> "+regionOf(f)+
+     "<br><b>District:</b> "+districtOf(f)+
+     "<br><b>Ward:</b> "+wardOf(f)
+    );
    }
+  }).addTo(map);
+
+  map.fitBounds(boundaryLayer.getBounds());
+
+  populate("region",unique(boundaries.features,regionOf),"All Regions");
+
+  updateDistricts();
+
+  status(
+   "Successfully loaded "+boundaries.features.length+
+   " administrative features. Ready for rainfall analysis."
+  );
+
+  log("Administrative boundaries loaded",{
+   features:boundaries.features.length
   });
 
-  state.outlineLayer = outline;
+ }catch(error){
 
-  if($("showOutline").checked){
-   outline.addTo(map);
-  }
+  status("Boundary error: "+error.message);
+  log("Boundary loading error",{error:error.message});
 
-  const bounds = outline.getBounds();
-  if(bounds.isValid()){
-   map.fitBounds(bounds,{padding:[20,20],maxZoom:12});
-  }
- }else{
-  map.fitBounds(gambiaBounds,{padding:[20,20]});
  }
 
- updateSelectedAreaText();
 }
 
-function updateSelectedAreaText(){
- let name = "The Gambia";
+// ======================================================
+// 4. ADMINISTRATIVE FILTERS
+// ======================================================
 
- if(state.selectedWard){
-  name = state.selectedWard;
- }else if(state.selectedDistrict){
-  name = state.selectedDistrict;
- }else if(state.selectedRegion){
-  name = state.selectedRegion;
- }
+function updateDistricts(){
 
- $("selectedArea").textContent =
-  "Selected area: "+name+
-  " | Enumeration areas: "+state.selectedEAs.length;
+ const r=document.getElementById("region").value;
 
- $("mapLabel").textContent =
-  name+" | "+state.selectedEAs.length+" enumeration areas";
-}
-
-function refreshSelection(){
- const features = getFilteredEAs();
-
- state.selectedGeometry = null;
- renderEAFeatures(features);
-}
-
-$("region").addEventListener("change",updateAdministrativeSelectors);
-$("district").addEventListener("change",updateDistrictSelection);
-$("ward").addEventListener("change",updateWardSelection);
-
-$("showEA").addEventListener("change",()=>{
- if(!state.eaLayer) return;
- if($("showEA").checked) state.eaLayer.addTo(map);
- else map.removeLayer(state.eaLayer);
-});
-
-$("showOutline").addEventListener("change",()=>{
- if(!state.outlineLayer) return;
- if($("showOutline").checked) state.outlineLayer.addTo(map);
- else map.removeLayer(state.outlineLayer);
-});
-
-$("zoomBtn").addEventListener("click",()=>{
- if(state.outlineLayer && state.outlineLayer.getBounds().isValid()){
-  map.fitBounds(state.outlineLayer.getBounds(),{padding:[20,20]});
- }else{
-  map.fitBounds(gambiaBounds);
- }
-});
-
-$("resetBtn").addEventListener("click",()=>{
- $("region").value="";
- state.selectedRegion="";
- state.selectedDistrict="";
- state.selectedWard="";
-
- fillSelect(
-  "district",
-  uniqueSorted(state.allEAs.map(getDistrict)),
-  "All districts"
+ const features=boundaries.features.filter(f=>
+  !r||regionOf(f)===r
  );
 
- fillSelect(
-  "ward",
-  uniqueSorted(state.allEAs.map(getWard)),
-  "All wards"
+ populate("district",unique(features,districtOf),"All Districts");
+ updateWards();
+
+}
+
+function updateWards(){
+
+ const r=document.getElementById("region").value;
+ const d=document.getElementById("district").value;
+
+ const features=boundaries.features.filter(f=>
+  (!r||regionOf(f)===r)&&
+  (!d||districtOf(f)===d)
  );
 
- refreshSelection();
-});
+ populate("ward",unique(features,wardOf),"All Wards");
+ updateEAs();
 
-/* ============================================================
-   6. BUILD A SIMPLIFIED AOI GEOMETRY
-   ============================================================ */
+}
 
-function buildAnalysisGeometry(features){
- if(!features.length){
-  throw new Error("No EA polygons are available for the selected area.");
- }
+function updateEAs(){
 
- const polygons = [];
+ const r=document.getElementById("region").value;
+ const d=document.getElementById("district").value;
+ const w=document.getElementById("ward").value;
 
- features.forEach(feature=>{
-  let simplified = feature;
+ const features=boundaries.features.filter(f=>
+  (!r||regionOf(f)===r)&&
+  (!d||districtOf(f)===d)&&
+  (!w||wardOf(f)===w)
+ );
 
-  try{
-   simplified = turf.simplify(feature,{
-    tolerance:0.008,
-    highQuality:false,
-    mutate:false
+ populate("ea",unique(features,eaOf),"All Enumeration Areas");
+ updateSelection();
+
+}
+
+function updateSelection(){
+
+ if(!boundaries)return;
+
+ const r=document.getElementById("region").value;
+ const d=document.getElementById("district").value;
+ const w=document.getElementById("ward").value;
+ const e=document.getElementById("ea").value;
+
+ selectedFeatures=boundaries.features.filter(f=>
+  (!r||regionOf(f)===r)&&
+  (!d||districtOf(f)===d)&&
+  (!w||wardOf(f)===w)&&
+  (!e||eaOf(f)===e)
+ );
+
+ document.getElementById("eaCount").textContent=
+ selectedFeatures.length.toLocaleString();
+
+ if(boundaryLayer){
+
+  boundaryLayer.clearLayers();
+
+  boundaryLayer.addData({
+   type:"FeatureCollection",
+   features:selectedFeatures
+  });
+
+  if(selectedFeatures.length){
+   map.fitBounds(boundaryLayer.getBounds(),{
+    padding:[15,15],
+    maxZoom:12
    });
-  }catch(error){
-   console.warn("Simplification skipped for one EA:",error);
   }
 
-  const geometry = simplified.geometry || feature.geometry;
+ }
 
-  if(geometry.type === "Polygon"){
-   polygons.push(geometry.coordinates);
-  }else if(geometry.type === "MultiPolygon"){
-   geometry.coordinates.forEach(poly=>polygons.push(poly));
+}
+
+document.getElementById("region").addEventListener("change",updateDistricts);
+document.getElementById("district").addEventListener("change",updateWards);
+document.getElementById("ward").addEventListener("change",updateEAs);
+document.getElementById("ea").addEventListener("change",updateSelection);
+
+// ======================================================
+// 5. GEOMETRY
+// ======================================================
+
+function selectedGeometry(){
+
+ const polygons=[];
+
+ selectedFeatures.forEach(f=>{
+
+  if(!f.geometry)return;
+
+  if(f.geometry.type==="Polygon"){
+   polygons.push(f.geometry.coordinates);
   }
+
+  if(f.geometry.type==="MultiPolygon"){
+   f.geometry.coordinates.forEach(p=>polygons.push(p));
+  }
+
  });
 
  if(!polygons.length){
-  throw new Error("Could not create a valid analysis geometry.");
+  throw new Error("Selected boundaries contain no valid polygons.");
  }
 
  return {
   type:"MultiPolygon",
   coordinates:polygons
  };
+
 }
 
-/* ============================================================
-   7. CLIMATESERV JSONP
-   ============================================================ */
+// ======================================================
+// 6. CLIMATESERV JSONP CONNECTION
+// ======================================================
 
-let jsonpCounter = 0;
+function climateJSONP(method,params={}){
 
-function climateJSONP(url,timeoutMs=60000){
  return new Promise((resolve,reject)=>{
-  const callbackName = "climateCallback_"+(++jsonpCounter);
-  const script = document.createElement("script");
-  let finished = false;
 
-  const timer = setTimeout(()=>{
-   finish(new Error(
-    "ClimateSERV did not respond within "+(timeoutMs/1000)+" seconds."
-   ));
-  },timeoutMs);
+  const callback="gbosClimate_"+Date.now()+"_"+
+  Math.floor(Math.random()*1000000);
 
-  function finish(error,result){
-   if(finished) return;
+  const query=new URLSearchParams();
 
-   finished = true;
-   clearTimeout(timer);
+  Object.entries(params).forEach(([key,value])=>{
+   query.set(key,String(value));
+  });
 
-   try{delete window[callbackName]}catch(e){}
+  query.set("callback",callback);
+
+  const script=document.createElement("script");
+
+  let completed=false;
+
+  const timeout=setTimeout(()=>{
+   finish();
+   reject(new Error("ClimateSERV timed out after 45 seconds."));
+  },45000);
+
+  function finish(){
+   if(completed)return;
+   completed=true;
+   clearTimeout(timeout);
+   delete window[callback];
    script.remove();
-
-   if(error) reject(error);
-   else resolve(result);
   }
 
-  window[callbackName] = result=>{
-   finish(null,result);
+  window[callback]=data=>{
+   finish();
+   resolve(data);
   };
 
-  script.onerror = ()=>{
-   finish(new Error(
-    "ClimateSERV JSONP script could not load. " +
-    "The service may be unavailable, blocked by the network, " +
-    "or rejecting the request URL."
+  script.onerror=()=>{
+   finish();
+   reject(new Error(
+    "ClimateSERV API script failed. Check internet access, API availability or network blocking."
    ));
   };
 
-  script.src = url+
-   (url.includes("?")?"&":"?")+
-   "callback="+encodeURIComponent(callbackName);
+  script.src=API+method+"/?"+query.toString();
 
   document.head.appendChild(script);
+
  });
+
 }
 
-function setProgress(percent,text){
- $("progress").style.display="block";
- $("progressFill").style.width=
-  Math.max(0,Math.min(100,percent))+"%";
- $("progressText").textContent=text;
+// ======================================================
+// 7. DATE FORMAT
+// ======================================================
+
+function formatDate(date){
+
+ const p=date.split("-");
+
+ return p[1]+"/"+p[2]+"/"+p[0];
+
 }
 
-function formatClimateDate(iso){
- const parts=iso.split("-");
- return parts[1]+"/"+parts[2]+"/"+parts[0];
-}
+// ======================================================
+// 8. PROCESSING JOB SUBMISSION
+// ======================================================
 
-function parseJobId(response){
- if(typeof response==="string"){
-  try{response=JSON.parse(response)}catch(e){}
+function parseJobID(response){
+
+ let value=response;
+
+ if(typeof value==="string"){
+  try{value=JSON.parse(value)}catch(e){}
  }
 
- if(Array.isArray(response)){
-  return String(response[0]||"");
+ if(Array.isArray(value)){
+  value=value[0];
  }
 
- if(response && typeof response==="object"){
-  return String(response.uniqueid||response.id||response.jobid||"");
+ if(value&&typeof value==="object"){
+  value=value.uniqueid||value.id||value.jobid;
  }
 
- return "";
-}
-
-async function submitRainfallRequest(start,end,geometry){
- const params = new URLSearchParams();
-
- params.set("datatype","0");
- params.set("begintime",formatClimateDate(start));
- params.set("endtime",formatClimateDate(end));
- params.set("intervaltype","0");
- params.set("operationtype","5");
- params.set("dateType_Category","default");
- params.set("geometry",JSON.stringify(geometry));
-
- // Do not send isZip_CurrentDataType=false:
- // ClimateSERV documentation warns that sending a value can request ZIP output.
-
- const url=CLIMATE_API+"submitDataRequest/?"+params.toString();
-
- setProgress(5,"Submitting CHIRPS rainfall request...");
-
- const response=await climateJSONP(url,90000);
- const id=parseJobId(response);
-
- if(!id || id==="undefined"){
+ if(typeof value!=="string"||
+ !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)){
   throw new Error(
-   "ClimateSERV did not return a job ID. Response: "+
+   "ClimateSERV returned an invalid job ID: "+
    JSON.stringify(response)
   );
  }
 
- return id;
+ return value;
+
 }
 
-function readProgress(response){
- if(Array.isArray(response)){
-  return Number(response[0]);
- }
- if(typeof response==="number") return response;
- if(typeof response==="string") return Number(response);
+async function submitJob(){
 
- if(response && typeof response==="object"){
-  return Number(response.progress??response.value??response[0]);
+ const start=document.getElementById("startDate").value;
+ const end=document.getElementById("endDate").value;
+
+ if(!start||!end)throw new Error("Select both dates.");
+
+ if(start>end)throw new Error("Start date must precede end date.");
+
+ const years=(new Date(end)-new Date(start))/(365.25*86400000);
+
+ if(years>20){
+  throw new Error("ClimateSERV allows a maximum 20-year request.");
  }
 
- return NaN;
+ const geometry=selectedGeometry();
+
+ const params={
+  datatype:document.getElementById("dataset").value,
+  begintime:formatDate(start),
+  endtime:formatDate(end),
+  intervaltype:document.getElementById("interval").value,
+  operationtype:document.getElementById("operation").value,
+  geometry:JSON.stringify(geometry),
+  dateType_Category:"default",
+  isZip_CurrentDataType:"false"
+ };
+
+ log("Submitting ClimateSERV request",{
+  start,end,
+  selectedEA:selectedFeatures.length,
+  parameters:params
+ });
+
+ const result=await climateJSONP("submitDataRequest",params);
+
+ currentJob=parseJobID(result);
+
+ log("ClimateSERV job accepted",{jobID:currentJob});
+
+ return currentJob;
+
 }
 
-async function waitForRainfallJob(id){
- for(let i=0;i<180;i++){
-  const url=CLIMATE_API+
-   "getDataRequestProgress/?id="+encodeURIComponent(id);
+// ======================================================
+// 9. CHECK PROCESSING PROGRESS
+// ======================================================
 
-  const response=await climateJSONP(url,45000);
-  const progress=readProgress(response);
+async function waitForJob(jobID){
 
-  if(Number.isFinite(progress)){
-   setProgress(
-    progress,
-    "ClimateSERV processing: "+progress.toFixed(0)+"%"
-   );
+ for(let i=0;i<120;i++){
 
-   if(progress<0){
-    throw new Error(
-     "ClimateSERV returned a processing error for this request."
-    );
-   }
+  const response=await climateJSONP(
+   "getDataRequestProgress",
+   {id:jobID}
+  );
 
-   if(progress>=100) return;
+  let value=response;
+
+  if(typeof value==="string"){
+   try{value=JSON.parse(value)}catch(e){}
   }
 
-  await new Promise(resolve=>setTimeout(resolve,2500));
+  if(Array.isArray(value))value=value[0];
+
+  const percent=Number(value);
+
+  if(!Number.isFinite(percent)||percent<0){
+   throw new Error(
+    "ClimateSERV returned an error processing status: "+
+    JSON.stringify(response)
+   );
+  }
+
+  progress(percent,"ClimateSERV processing: "+percent+"%");
+
+  if(percent>=100)return;
+
+  await new Promise(resolve=>setTimeout(resolve,3000));
+
  }
 
  throw new Error("ClimateSERV processing timed out.");
+
 }
 
-async function getRainfallResults(id){
- const url=CLIMATE_API+
-  "getDataFromRequest/?id="+encodeURIComponent(id);
+// ======================================================
+// 10. RETRIEVE RESULTS
+// ======================================================
 
- return await climateJSONP(url,90000);
-}
+async function retrieveResults(jobID){
 
-/* ============================================================
-   8. PARSE CLIMATESERV DATA
-   Documented structure:
-   response.data[n].date
-   response.data[n].value.avg
-   ============================================================ */
-
-function parseClimateDate(value){
- const parts=String(value).split("/");
- if(parts.length!==3) return null;
-
- const day=Number(parts[0]);
- const month=Number(parts[1]);
- let year=Number(parts[2]);
-
- if(year<100) year+=year<50?2000:1900;
-
- const date=new Date(Date.UTC(year,month-1,day));
- if(Number.isNaN(date.getTime())) return null;
-
- return date;
-}
-
-function parseRainfallResponse(response){
- if(typeof response==="string"){
-  try{response=JSON.parse(response)}catch(e){}
- }
-
- const records =
-  Array.isArray(response) ? response :
-  (response && Array.isArray(response.data) ? response.data : []);
-
- const rows=[];
-
- records.forEach(item=>{
-  const date=parseClimateDate(item.date);
-  const valueObject=item.value;
-
-  let value;
-
-  if(valueObject && typeof valueObject==="object"){
-   value=Number(
-    valueObject.avg ??
-    valueObject.average ??
-    valueObject.mean
-   );
-  }else{
-   value=Number(valueObject);
-  }
-
-  if(date && Number.isFinite(value) && value>=0){
-   rows.push({
-    date,
-    dateLabel:date.toISOString().slice(0,10),
-    value
-   });
-  }
- });
-
- rows.sort((a,b)=>a.date-b.date);
- return rows;
-}
-
-/* ============================================================
-   9. ANALYTICS
-   ============================================================ */
-
-function getMonthlySummary(rows){
- const grouped={};
-
- rows.forEach(row=>{
-  const key=
-   row.date.getUTCFullYear()+"-"+
-   String(row.date.getUTCMonth()+1).padStart(2,"0");
-
-  if(!grouped[key]){
-   grouped[key]={
-    key,
-    label:row.date.toLocaleString("en",{
-     month:"short",timeZone:"UTC"
-    })+" "+row.date.getUTCFullYear(),
-    total:0,
-    count:0
-   };
-  }
-
-  grouped[key].total+=row.value;
-  grouped[key].count++;
- });
-
- return Object.values(grouped).sort((a,b)=>
-  a.key.localeCompare(b.key)
+ const response=await climateJSONP(
+  "getDataFromRequest",
+  {id:jobID}
  );
-}
 
-function renderMonthlyTable(months){
- const tbody=$("monthlyTable");
- tbody.innerHTML="";
+ let result=response;
 
- months.forEach(item=>{
-  const tr=document.createElement("tr");
+ if(typeof result==="string"){
+  try{result=JSON.parse(result)}catch(e){}
+ }
 
-  [item.label,item.total.toFixed(2),item.count].forEach(value=>{
-   const td=document.createElement("td");
-   td.textContent=value;
-   tr.appendChild(td);
-  });
+ if(!result||!Array.isArray(result.data)){
+  throw new Error(
+   "ClimateSERV returned an invalid result: "+
+   JSON.stringify(result).slice(0,500)
+  );
+ }
 
-  tbody.appendChild(tr);
- });
-}
+ if(!result.data.length){
+  throw new Error("No rainfall observations returned.");
+ }
 
-function renderCharts(rows,months){
- if(state.dailyChart) state.dailyChart.destroy();
- if(state.monthlyChart) state.monthlyChart.destroy();
+ const operation={
+  "0":"max",
+  "1":"min",
+  "2":"median",
+  "3":"range",
+  "4":"sum",
+  "5":"avg"
+ }[document.getElementById("operation").value];
 
- state.dailyChart=new Chart($("dailyChart"),{
-  type:"line",
-  data:{
-   labels:rows.map(r=>r.dateLabel),
-   datasets:[{
-    label:"Area-average daily rainfall (mm)",
-    data:rows.map(r=>r.value),
-    borderColor:"#0759a6",
-    backgroundColor:"rgba(7,89,166,.12)",
-    fill:true,
-    tension:.2,
-    pointRadius:1
-   }]
-  },
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{legend:{labels:{font:{size:10}}}},
-   scales:{
-    x:{ticks:{maxTicksLimit:7,font:{size:9}}},
-    y:{
-     beginAtZero:true,
-     title:{display:true,text:"Rainfall (mm)"}
-    }
-   }
+ const records=result.data.map(item=>{
+
+  const raw=item.value?.[operation];
+
+  const value=Number(raw);
+
+  if(!Number.isFinite(value)||value<0){
+   throw new Error(
+    "Invalid rainfall value for "+item.date
+   );
   }
+
+  return {
+   date:item.date,
+   epochTime:item.epochTime||null,
+   rainfall:value,
+   operation:operation,
+   jobID:jobID,
+   region:document.getElementById("region").value||"All",
+   district:document.getElementById("district").value||"All",
+   ward:document.getElementById("ward").value||"All",
+   selectedEA:document.getElementById("ea").value||"All selected EAs",
+   selectedEACount:selectedFeatures.length
+  };
+
  });
 
- state.monthlyChart=new Chart($("monthlyChart"),{
-  type:"bar",
-  data:{
-   labels:months.map(m=>m.label),
-   datasets:[{
-    label:"Monthly rainfall (mm)",
-    data:months.map(m=>Number(m.total.toFixed(2))),
-    backgroundColor:"#16834a"
-   }]
-  },
-  options:{
-   responsive:true,
-   maintainAspectRatio:false,
-   plugins:{legend:{display:false}},
-   scales:{
-    x:{ticks:{font:{size:9},maxRotation:55,minRotation:30}},
-    y:{
-     beginAtZero:true,
-     title:{display:true,text:"Rainfall (mm)"}
-    }
-   }
-  }
- });
+ return records;
+
 }
 
-function renderAnalytics(rows){
- if(!rows.length){
-  throw new Error("No valid rainfall records were returned.");
- }
+// ======================================================
+// 11. MAIN RAINFALL WORKFLOW
+// ======================================================
 
- const values=rows.map(r=>r.value);
- const total=values.reduce((a,b)=>a+b,0);
- const mean=total/values.length;
- const maximum=Math.max(...values);
+async function runRainfall(){
 
- $("totalRain").textContent=total.toFixed(1);
- $("meanRain").textContent=mean.toFixed(2);
- $("maxRain").textContent=maximum.toFixed(2);
- $("recordCount").textContent=values.length;
+ if(busy)return;
 
- const months=getMonthlySummary(rows);
- renderMonthlyTable(months);
- renderCharts(rows,months);
-}
-
-/* ============================================================
-   10. VALIDATE AND RUN ANALYSIS
-   ============================================================ */
-
-function validateDates(start,end){
- if(!start || !end){
-  throw new Error("Choose both start and end dates.");
- }
-
- const a=new Date(start+"T00:00:00Z");
- const b=new Date(end+"T00:00:00Z");
-
- if(Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())){
-  throw new Error("Invalid date selection.");
- }
-
- if(a>b){
-  throw new Error("Start date must be before end date.");
- }
-
- if(b>new Date()){
-  throw new Error("The end date cannot be in the future for historical CHIRPS data.");
- }
-
- const years=(b-a)/(365.25*86400000);
-
- if(years>20){
-  throw new Error("ClimateSERV allows a maximum of 20 years per request.");
- }
-}
-
-async function runAnalysis(){
- if(state.busy) return;
-
- if(!state.allEAs.length){
-  showMessage("Census EA boundaries are not loaded.","bad");
+ if(!boundaries){
+  alert("Administrative boundaries have not loaded.");
   return;
  }
-
- const start=$("startDate").value;
- const end=$("endDate").value;
-
- try{
-  validateDates(start,end);
- }catch(error){
-  showMessage(error.message,"bad");
-  return;
- }
-
- const selectedFeatures=getFilteredEAs();
 
  if(!selectedFeatures.length){
-  showMessage("No enumeration areas match the selected administrative filters.","bad");
+  alert("Select at least one EA.");
   return;
  }
 
- state.busy=true;
- $("runBtn").disabled=true;
- $("csvBtn").disabled=true;
+ busy=true;
 
- status("rainStatus","rainDot","Preparing CHIRPS analysis...");
+ const button=document.getElementById("runButton");
+ button.disabled=true;
+
+ rainfallRecords=[];
+ disableExports();
+ resetAnalytics();
+
+ progress(0,"Preparing request...");
 
  try{
-  setProgress(2,"Preparing selected EA geometry...");
 
-  const geometry=buildAnalysisGeometry(selectedFeatures);
+  status("Submitting CHIRPS rainfall request...");
 
-  state.selectedGeometry=geometry;
+  const jobID=await submitJob();
 
-  const geometrySize=JSON.stringify(geometry).length;
+  status("ClimateSERV accepted request. Job ID: "+jobID);
 
-  if(geometrySize>150000){
-   throw new Error(
-    "The selected boundary geometry is too large for a reliable browser request. " +
-    "Select a smaller area, such as one district or ward, and try again."
-   );
+  progress(0,"Waiting for processing...");
+
+  await waitForJob(jobID);
+
+  status("Processing completed. Downloading actual rainfall observations...");
+
+  progress(100,"Retrieving results...");
+
+  const records=await retrieveResults(jobID);
+
+  if(!records.length){
+   throw new Error("No rainfall observations available.");
   }
 
-  const jobId=await submitRainfallRequest(start,end,geometry);
+  rainfallRecords=records;
 
-  status("rainStatus","rainDot","CHIRPS request submitted");
-
-  await waitForRainfallJob(jobId);
-
-  setProgress(96,"Retrieving rainfall observations...");
-
-  const response=await getRainfallResults(jobId);
-  const rows=parseRainfallResponse(response);
-
-  if(!rows.length){
-   throw new Error(
-    "ClimateSERV returned no valid rainfall records. " +
-    "The response may contain an error or no data for this period."
-   );
-  }
-
-  state.rainfall=rows;
-  renderAnalytics(rows);
-
-  $("csvBtn").disabled=false;
-
-  setProgress(100,"Rainfall analysis completed.");
+  updateAnalytics();
+  enableExports();
 
   status(
-   "rainStatus","rainDot",
-   "CHIRPS analysis completed: "+rows.length+" records",
-   "ok"
+   "SUCCESS: Retrieved "+records.length+
+   " verified rainfall observations from ClimateSERV."
   );
 
-  showMessage(
-   "Analysis completed for "+
-   (state.selectedWard || state.selectedDistrict ||
-    state.selectedRegion || "The Gambia")+
-   ". Enumeration areas included: "+selectedFeatures.length+
-   ". Daily rainfall records: "+rows.length+".",
-   "good"
-  );
+  log("Rainfall retrieval completed",{
+   jobID,
+   observationCount:records.length
+  });
 
  }catch(error){
-  console.error("Rainfall analysis error:",error);
+
+  rainfallRecords=[];
+
+  disableExports();
+  resetAnalytics();
 
   status(
-   "rainStatus","rainDot",
-   "Rainfall analysis failed",
-   "bad"
+   "REQUEST FAILED: "+error.message+
+   " No substitute rainfall values were generated."
   );
 
-  showMessage(
-   error.message+
-   " No substitute or invented rainfall data have been generated.",
-   "bad"
-  );
+  log("Rainfall request failed",{error:error.message});
+
+  console.error(error);
 
  }finally{
-  state.busy=false;
-  $("runBtn").disabled=false;
+
+  busy=false;
+  button.disabled=false;
+
  }
+
 }
 
-$("runBtn").addEventListener("click",runAnalysis);
+// ======================================================
+// 12. ANALYTICS
+// ======================================================
 
-/* ============================================================
-   11. EXPORT CSV AND GEOJSON
-   ============================================================ */
+function resetAnalytics(){
 
-function downloadFile(content,filename,mime){
- const blob=new Blob([content],{type:mime});
+ ["recordCount","mean","minimum","maximum","total"].forEach(id=>{
+  document.getElementById(id).textContent="N/A";
+ });
+
+ document.getElementById("recordCount").textContent="0";
+
+ if(chart){
+  chart.destroy();
+  chart=null;
+ }
+
+}
+
+function updateAnalytics(){
+
+ if(!rainfallRecords.length)return;
+
+ const values=rainfallRecords.map(r=>r.rainfall);
+
+ const mean=values.reduce((a,b)=>a+b,0)/values.length;
+ const total=values.reduce((a,b)=>a+b,0);
+
+ document.getElementById("recordCount").textContent=values.length;
+ document.getElementById("mean").textContent=mean.toFixed(2);
+ document.getElementById("minimum").textContent=Math.min(...values).toFixed(2);
+ document.getElementById("maximum").textContent=Math.max(...values).toFixed(2);
+ document.getElementById("total").textContent=total.toFixed(2);
+
+ if(chart)chart.destroy();
+
+ chart=new Chart(document.getElementById("rainChart"),{
+  type:"line",
+  data:{
+   labels:rainfallRecords.map(r=>r.date),
+   datasets:[{
+    label:"Rainfall ("+rainfallRecords[0].operation+", mm)",
+    data:values,
+    borderColor:"#2563eb",
+    backgroundColor:"rgba(37,99,235,.12)",
+    fill:true,
+    tension:.25,
+    pointRadius:2
+   }]
+  },
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{
+    legend:{display:true}
+   },
+   scales:{
+    y:{
+     beginAtZero:true,
+     title:{display:true,text:"Rainfall (mm)"}
+    },
+    x:{
+     ticks:{maxTicksLimit:8}
+    }
+   }
+  }
+ });
+
+}
+
+// ======================================================
+// 13. EXPORT CONTROLS
+// ======================================================
+
+function disableExports(){
+
+ document.getElementById("csvButton").disabled=true;
+ document.getElementById("excelButton").disabled=true;
+
+}
+
+function enableExports(){
+
+ document.getElementById("csvButton").disabled=false;
+ document.getElementById("excelButton").disabled=false;
+
+}
+
+function download(content,filename,type){
+
+ const blob=new Blob([content],{type:type});
  const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
 
+ const a=document.createElement("a");
  a.href=url;
  a.download=filename;
-
  document.body.appendChild(a);
  a.click();
  a.remove();
 
- URL.revokeObjectURL(url);
+ setTimeout(()=>URL.revokeObjectURL(url),1500);
+
 }
 
-$("csvBtn").addEventListener("click",()=>{
- if(!state.rainfall.length) return;
+// ======================================================
+// 14. CSV EXPORT
+// ======================================================
 
- const lines=["date,area_average_rainfall_mm"];
+function exportCSV(){
 
- state.rainfall.forEach(row=>{
-  lines.push(row.dateLabel+","+row.value);
- });
+ if(!rainfallRecords.length){
+  alert("No verified rainfall records.");
+  return;
+ }
 
- downloadFile(
-  lines.join("\n"),
-  "Gambia_CHIRPS_Rainfall_Analysis.csv",
+ const headers=Object.keys(rainfallRecords[0]);
+
+ const rows=rainfallRecords.map(r=>
+  headers.map(k=>r[k])
+ );
+
+ const csv=[headers,...rows].map(row=>
+  row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")
+ ).join("\r\n");
+
+ download(
+  "\uFEFF"+csv,
+  "Gambia_CHIRPS_Rainfall.csv",
   "text/csv;charset=utf-8"
  );
-});
 
-$("geoBtn").addEventListener("click",()=>{
- if(!state.selectedEAs.length) return;
+ log("Rainfall CSV exported.");
 
- const collection={
+}
+
+// ======================================================
+// 15. EXCEL-COMPATIBLE CSV
+// ======================================================
+
+function exportExcel(){
+
+ if(!rainfallRecords.length){
+  alert("No verified rainfall records.");
+  return;
+ }
+
+ const headers=Object.keys(rainfallRecords[0]);
+
+ const rows=rainfallRecords.map(r=>
+  headers.map(k=>r[k])
+ );
+
+ const csv=[headers,...rows].map(row=>
+  row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")
+ ).join("\r\n");
+
+ download(
+  "\uFEFF"+csv,
+  "Gambia_CHIRPS_Rainfall_Excel.csv",
+  "text/csv;charset=utf-8"
+ );
+
+ log("Excel-compatible CSV exported.");
+
+}
+
+// ======================================================
+// 16. GEOJSON EXPORT
+// ======================================================
+
+function exportGeoJSON(){
+
+ if(!selectedFeatures.length){
+  alert("No selected boundaries.");
+  return;
+ }
+
+ const output={
   type:"FeatureCollection",
-  features:state.selectedEAs
+  name:"Gambia_Selected_Enumeration_Areas",
+  features:selectedFeatures
  };
 
- downloadFile(
-  JSON.stringify(collection,null,2),
-  "Gambia_Selected_Census_EAs.geojson",
+ download(
+  JSON.stringify(output,null,2),
+  "Gambia_Selected_EA.geojson",
   "application/geo+json"
  );
-});
 
-$("eaCsvBtn").addEventListener("click",()=>{
- if(!state.selectedEAs.length) return;
+ log("Selected EA GeoJSON exported.");
 
- const fields=[
-  "feacode","eaname","lganame","distname","wardname",
-  "sum_pop","sum_hhs"
- ];
+}
 
- const header=fields.join(",");
- const lines=[header];
+// ======================================================
+// 17. MAP PNG EXPORT
+// ======================================================
 
- state.selectedEAs.forEach(feature=>{
-  const p=feature.properties||{};
+async function exportPNG(){
 
-  const row=fields.map(field=>{
-   const value=getProperty(feature,[field]);
-   return '"'+String(value).replace(/"/g,'""')+'"';
-  });
+ try{
 
-  lines.push(row.join(","));
- });
+  const canvas=await html2canvas(
+   document.getElementById("map"),
+   {scale:2,useCORS:true}
+  );
 
- downloadFile(
-  lines.join("\n"),
-  "Gambia_Selected_EA_Attributes.csv",
-  "text/csv;charset=utf-8"
+  const url=canvas.toDataURL("image/png");
+
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="Gambia_Rainfall_Map.png";
+  a.click();
+
+  log("Map PNG exported.");
+
+ }catch(error){
+
+  alert(
+   "Map PNG export failed. Some external basemap tiles may block canvas export. "+
+   error.message
+  );
+
+ }
+
+}
+
+// ======================================================
+// 18. REQUEST LOG EXPORT
+// ======================================================
+
+function exportLog(){
+
+ const output={
+  dashboard:"GBoS GEOAI Gambia Rainfall Intelligence",
+  exportDate:new Date().toISOString(),
+  API:API,
+  jobID:currentJob,
+  rainfallRecords:rainfallRecords.length,
+  rainfallStatus:rainfallRecords.length?"Retrieved":"Not available",
+  selectedEAs:selectedFeatures.length,
+  events:requestLog
+ };
+
+ download(
+  JSON.stringify(output,null,2),
+  "ClimateSERV_Request_Log.json",
+  "application/json"
  );
-});
 
-/* ============================================================
-   12. START DASHBOARD
-   ============================================================ */
+}
 
-loadCensusEAs();
+// ======================================================
+// 19. RESET
+// ======================================================
+
+function resetDashboard(){
+
+ if(busy){
+  alert("Wait for the current request to finish.");
+  return;
+ }
+
+ document.getElementById("region").value="";
+ updateDistricts();
+
+ document.getElementById("startDate").value="2026-08-01";
+ document.getElementById("endDate").value="2026-08-31";
+ document.getElementById("operation").value="5";
+
+ rainfallRecords=[];
+ currentJob=null;
+
+ disableExports();
+ resetAnalytics();
+ progress(0,"Waiting for request.");
+
+ status("Dashboard reset. Select an area and submit a new request.");
+
+ log("Dashboard reset.");
+
+}
+
+// ======================================================
+// 20. START
+// ======================================================
+
+loadBoundaries();
 
 </script>
+
 </body>
 </html>
 
