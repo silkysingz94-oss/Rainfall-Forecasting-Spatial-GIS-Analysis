@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Gambia Memorial Map | GBoS GEOAI</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+*{box-sizing:border-box}body{margin:0;font:14px Arial,sans-serif;background:#edf2f7;color:#172033}header{padding:5px;background:linear-gradient(90deg,#c4161c 25%,white 25% 50%,#185abd 50% 75%,#16803b 75%)}.banner{position:relative;background:#123c2b;color:#fff;text-align:center;padding:15px}.banner h1{font-size:20px;margin:0 0 5px}.banner p{margin:0;color:#d9f3e3;font-size:12px}.layout{display:grid;grid-template-columns:320px 1fr;gap:10px;padding:10px;min-height:calc(100vh - 100px)}.panel{background:#fff;border:1px solid #dce4ed;border-radius:9px;padding:15px;overflow:auto}.section{border-bottom:1px solid #dce4ed;padding:3px 0 14px;margin-bottom:14px}.section h2{font-size:14px;color:#1a6a3a;margin:4px 0 10px}.about{font-size:12px;line-height:1.6;color:#475569}.stats{background:#f0fdf4;padding:12px;border-radius:7px}.stats strong{font-size:24px;color:#1a6a3a}.controls{display:flex;gap:7px;flex-wrap:wrap}button{border:0;border-radius:5px;padding:10px;background:#1a6a3a;color:white;font-weight:bold;cursor:pointer}button.secondary{background:#475569}button:disabled{opacity:.55;cursor:not-allowed}#map{height:calc(100vh - 125px);min-height:480px;border:1px solid #dce4ed;border-radius:9px;background:#e5eee7}.status{background:#f0fdf4;border-left:3px solid #1a6a3a;padding:9px;margin-top:10px;font-size:12px;line-height:1.5}.disclaimer{font-size:10px;line-height:1.5;color:#64748b}footer{text-align:center;padding:8px;color:#64748b;font-size:10px}.heart{font-size:24px;text-align:center;line-height:28px}.leaflet-popup-content{line-height:1.5}@media(max-width:800px){.layout{grid-template-columns:1fr}.panel{order:2}#map{height:58vh;min-height:420px}.mapbox{order:1}}
+</style>
+</head>
+<body>
+<header><div class="banner"><h1>The Gambia Memorial Map</h1><p>Remembering lives, preserving stories, and honouring places of remembrance</p></div></header>
+<main class="layout">
+<aside class="panel">
+<section class="section"><h2>Community memorial map</h2><div class="stats"><strong id="count">0</strong><div>places in this browser session</div></div><p class="about">Add a local draft memorial location by clicking <b>Add point</b>, then clicking its location on the map. Give it a name and optional note. Export your entries as GeoJSON to save them.</p></section>
+<section class="section"><h2>Add or manage locations</h2><div class="controls"><button id="addPoint" type="button">❤️ Add point</button><button id="cancelAdd" class="secondary" type="button" disabled>Cancel</button></div><div id="status" class="status" role="status">Ready. Press “Add point”, then click the map.</div></section>
+<section class="section"><h2>Search</h2><input id="search" type="search" placeholder="Search names and notes" style="width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:5px"><div id="results"></div></section>
+<section class="section"><h2>Load or export data</h2><label class="about" for="upload">Load memorial locations from GeoJSON</label><input id="upload" type="file" accept=".json,.geojson,application/json,application/geo+json"><div class="controls" style="margin-top:8px"><button id="export">Export GeoJSON</button><button id="clear" class="secondary">Clear session</button></div></section>
+<section><h2 class="about">About and attribution</h2><p class="disclaimer">This is a community remembrance map, not an official register. Entries are user-provided and are not independently verified or officially endorsed. Please obtain consent and verify details before sharing memorial information. Basemap © OpenStreetMap contributors.</p></section>
+</aside>
+<div class="mapbox"><div id="map" aria-label="Interactive map of The Gambia"></div></div>
+</main><footer>Community remembrance map • The Gambia | GBoS GEOAI</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+'use strict';
+const map=L.map('map').setView([13.45,-15.45],8);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
+const markers=L.featureGroup().addTo(map),sites=[];let addMode=false;
+const heart=L.divIcon({className:'heart',html:'❤️',iconSize:[30,30],iconAnchor:[15,15]});
+const $=id=>document.getElementById(id);
+const status=text=>{$('status').textContent=text};
+const escapeHTML=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function refresh(){ $('count').textContent=sites.length; const q=$('search').value.trim().toLowerCase();const found=sites.filter(s=>(s.name+' '+s.note).toLowerCase().includes(q));$('results').replaceChildren();found.forEach(s=>{const el=document.createElement('button');el.type='button';el.className='secondary';el.style.cssText='display:block;width:100%;text-align:left;margin-top:5px';el.textContent=s.name;el.onclick=()=>{map.setView([s.lat,s.lng],14);s.marker.openPopup()};$('results').appendChild(el)})}
+function addSite(name,note,lat,lng){const site={name,note,lat,lng};site.marker=L.marker([lat,lng],{icon:heart}).bindPopup(`<b>${escapeHTML(name)}</b><br>${escapeHTML(note||'Community-submitted location')}`);markers.addLayer(site.marker);sites.push(site);refresh()}
+$('addPoint').addEventListener('click',()=>{addMode=true;$('addPoint').disabled=true;$('cancelAdd').disabled=false;$('map').style.cursor='crosshair';status('Add mode is ON. Now click the desired location on the map.')});
+$('cancelAdd').addEventListener('click',()=>{addMode=false;$('addPoint').disabled=false;$('cancelAdd').disabled=true;$('map').style.cursor='';status('Add mode cancelled. Press “Add point” to start again.')});
+map.on('click',e=>{if(!addMode)return;const name=prompt('Enter a place or memorial name:');if(!name||!name.trim()){status('No point added. Enter a name when prompted.');$('cancelAdd').click();return}const note=prompt('Optional short note:')||'';addSite(name.trim(),note.trim(),e.latlng.lat,e.latlng.lng);status(`Added “${name.trim()}” at ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}. Export GeoJSON to save it.`);$('cancelAdd').click()});
+$('search').addEventListener('input',refresh);
+$('upload').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.type!=='FeatureCollection'||!Array.isArray(data.features))throw Error();let n=0;data.features.forEach(f=>{if(f.geometry?.type!=='Point')return;const [lng,lat]=f.geometry.coordinates||[];if(!Number.isFinite(lat)||!Number.isFinite(lng))return;addSite(String(f.properties?.name||f.properties?.title||'Memorial place'),String(f.properties?.note||f.properties?.description||''),lat,lng);n++});if(!n)throw Error();map.fitBounds(markers.getBounds(),{padding:[20,20],maxZoom:12});status(`Loaded ${n} point feature(s) from ${file.name}.`)}catch{status('Could not load file. Please select a GeoJSON FeatureCollection containing Point features.')}finally{e.target.value=''}});
+$('export').addEventListener('click',()=>{const features=sites.map(s=>({type:'Feature',geometry:{type:'Point',coordinates:[s.lng,s.lat]},properties:{name:s.name,note:s.note}}));const blob=new Blob([JSON.stringify({type:'FeatureCollection',name:'The_Gambia_Memorial_Places',features},null,2)],{type:'application/geo+json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='The_Gambia_Memorial_Places.geojson';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status(`Exported ${features.length} point(s) as GeoJSON.`)});
+$('clear').addEventListener('click',()=>{if(!confirm('Remove all locations added or loaded in this session?'))return;markers.clearLayers();sites.length=0;refresh();status('Session locations cleared.')});
+refresh();
+</script></body></html>
