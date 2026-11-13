@@ -1,48 +1,708 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#123c2b">
-<title>The Gambia Memorial Map | GBoS GEOAI</title>
+<title>GBoS GEOAI | Gambia Urban Energy Intelligence</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.2.0/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
-:root{--green:#1a6a3a;--red:#c4161c;--blue:#185abd;--gold:#e4b64d;--ink:#172033;--muted:#64748b;--panel:#fff;--bg:#edf2f7;--line:#dce4ed}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px Arial,sans-serif}#app{min-height:100vh;display:flex;flex-direction:column}header{background:linear-gradient(90deg,var(--red) 0 25%,#fff 25% 50%,var(--blue) 50% 75%,var(--green) 75%);padding:5px}.banner{background:#123c2b;color:#fff;text-align:center;padding:15px 48px;position:relative}.banner h1{font-size:20px;margin:0 0 5px}.banner p{font-size:12px;color:#d9f3e3;margin:0}.lang-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:1px solid #ffffff66;background:#ffffff14;color:#fff;border-radius:5px;padding:8px;cursor:pointer}.main{display:grid;grid-template-columns:320px 1fr;gap:10px;padding:10px;flex:1;min-height:0}.sidebar{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:15px;overflow:auto}.section{border-bottom:1px solid var(--line);padding:3px 0 14px;margin-bottom:14px}.section:last-child{border-bottom:0}.section h2{font-size:14px;color:var(--green);margin:4px 0 10px}.search-wrap{display:flex;gap:6px}.search-wrap input{min-width:0;flex:1}input,textarea{width:100%;border:1px solid #cbd5e1;border-radius:5px;background:#fff;padding:9px;font:inherit;font-size:12px}button{border:0;border-radius:5px;padding:9px 11px;background:var(--green);color:white;font-weight:bold;cursor:pointer;font-size:12px}button:hover{filter:brightness(.93)}button.secondary{background:#475569}button.outline{background:#fff;color:var(--green);border:1px solid var(--green)}.search-wrap button{min-width:42px}.search-results{max-height:180px;overflow:auto;margin-top:6px}.result{border:1px solid var(--line);border-radius:5px;padding:8px;margin-top:5px;cursor:pointer;font-size:12px}.result:hover{background:#f0fdf4}.stats{display:flex;align-items:center;gap:12px;background:#f0fdf4;border-radius:7px;padding:12px}.stat-number{font-size:26px;font-weight:bold;color:var(--green)}.stat-label{font-size:12px;color:var(--muted)}.poem{line-height:1.75;color:#334155;font-style:italic;padding:6px 0}.location{font-size:12px;color:#475569}.about{font-size:12px;line-height:1.65;color:#475569}.disclaimer{font-size:10px;line-height:1.55;color:var(--muted);background:#f8fafc;padding:9px;border-radius:5px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}.actions button{margin:0}.map-wrap{background:#dce9df;border:1px solid var(--line);border-radius:9px;min-height:500px;position:relative;overflow:hidden}#map{height:100%;min-height:500px;width:100%}.map-caption{position:absolute;z-index:500;left:12px;bottom:12px;background:#fffF;padding:7px 10px;border-radius:5px;font-size:10px;color:#475569;box-shadow:0 1px 5px #0002}.heart-marker{font-size:23px;line-height:25px;text-align:center;text-shadow:0 1px 3px #fff,0 1px 5px #0008}.popup-title{font-weight:bold;color:#14532d}.popup-meta{font-size:11px;color:#475569;line-height:1.5}footer{text-align:center;padding:8px;color:var(--muted);font-size:10px}.leaflet-popup-content{min-width:160px}@media(max-width:800px){.main{grid-template-columns:1fr}.sidebar{order:2}.map-wrap{order:1;height:58vh;min-height:420px}#map{min-height:420px}.banner{padding:14px 80px 14px 10px}.banner h1{font-size:17px}.lang-btn{right:7px}}
+:root{--bg:#07111d;--panel:#0d1b2a;--panel2:#102337;--line:#20384d;--text:#e8f1f8;--muted:#91a8ba;--cyan:#35c6dc;--blue:#3987ff;--green:#34d399;--orange:#f5a524;--red:#fb7185}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;overflow:hidden}
+header{height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:#091725;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#087f8c,#35c6dc);display:grid;place-items:center;font-weight:900;color:#03131d}
+.brand h1{font-size:15px;margin:0;letter-spacing:.8px}.brand small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.header-right{font-size:11px;color:var(--muted);text-align:right}.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange);margin-right:6px}
+main{height:calc(100% - 66px);display:grid;grid-template-columns:310px minmax(350px,1fr) 340px;gap:10px;padding:10px}
+.panel{min-height:0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.panel-head{padding:13px 14px;border-bottom:1px solid var(--line);background:#0b1927;flex:none}.panel-head h2{font-size:12px;letter-spacing:1px;margin:0}.panel-head p{font-size:10px;color:var(--muted);margin:5px 0 0}
+.panel-body{padding:13px;overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:#35536a transparent}
+.section{margin-bottom:16px}.section-title{font-size:10px;color:var(--cyan);font-weight:800;letter-spacing:1px;margin-bottom:9px}
+label{display:block;font-size:10px;color:var(--muted);margin:9px 0 5px}
+select,input[type=number]{width:100%;padding:9px 10px;background:#081522;border:1px solid #294257;border-radius:6px;color:var(--text);font-size:11px;outline:none}
+select:focus,input:focus{border-color:var(--cyan)}
+button{border:0;border-radius:6px;padding:10px 12px;font-weight:700;font-size:10px;cursor:pointer;color:#04131c;background:var(--cyan)}
+button.secondary{background:#20384d;color:var(--text);border:1px solid #35536a}
+.btn-row{display:flex;gap:7px;margin-top:10px}.btn-row button{flex:1}
+.note{font-size:9px;line-height:1.55;color:var(--muted);padding:9px;background:#0a1724;border:1px solid var(--line);border-radius:6px}
+.status-list{display:grid;gap:7px}.status-item{display:flex;justify-content:space-between;gap:8px;font-size:10px;padding:7px 8px;background:#091725;border:1px solid #1c3448;border-radius:5px}
+.status-item span:first-child{color:var(--muted)}.status-value{font-weight:700;text-align:right}
+.good{color:var(--green)}.bad{color:var(--red)}.waiting{color:var(--orange)}
+#mapWrap{position:relative;min-height:0;overflow:hidden;background:#142536;border:1px solid var(--line);border-radius:10px}
+#map{height:100%;width:100%;background:#172b3b}
+.map-overlay{position:absolute;z-index:500;top:12px;left:12px;max-width:calc(100% - 24px);background:rgba(5,17,29,.91);border:1px solid #36536b;border-radius:7px;padding:10px 12px;pointer-events:none}
+.map-overlay strong{font-size:11px;display:block}.map-overlay span{font-size:9px;color:#b5c7d6}
+.map-legend{position:absolute;z-index:500;bottom:18px;left:12px;background:rgba(5,17,29,.93);border:1px solid #36536b;border-radius:7px;padding:10px;font-size:9px;line-height:1.9}
+.legend-line{display:inline-block;width:17px;height:3px;margin-right:6px;vertical-align:middle}
+.map-attribution{position:absolute;z-index:500;right:8px;bottom:4px;font-size:9px;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{padding:10px;background:#091725;border:1px solid #20384d;border-radius:7px;min-width:0}
+.kpi .k-label{font-size:9px;color:var(--muted);line-height:1.4}.kpi .k-value{font-size:19px;font-weight:800;margin-top:5px;overflow-wrap:anywhere}.kpi .k-unit{font-size:9px;color:var(--muted)}
+.chart-box{height:190px;padding:9px;background:#091725;border:1px solid var(--line);border-radius:7px;margin-bottom:10px}
+.chart-box h3{font-size:10px;margin:0 0 8px;color:#c9d8e4}.chart-box canvas{max-height:145px}
+.analytics-note{font-size:9px;color:var(--muted);line-height:1.5;margin-top:7px}
+footer{padding:10px 0 2px;text-align:center;color:#71899d;font-size:9px;line-height:1.6}
+.leaflet-control-attribution{font-size:8px!important}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0d1b2a;color:#e8f1f8}.leaflet-popup-content{font-size:11px}
+@media(max-width:1050px){html,body{height:auto;min-height:100%;overflow:auto}main{height:auto;grid-template-columns:1fr;padding:8px}.panel{min-height:380px}#mapWrap{height:65vh;min-height:420px;order:0}header{position:sticky;top:0;z-index:1000}}
 </style>
 </head>
-<body><div id="app">
-<header><div class="banner"><h1 id="title">The Gambia Memorial Map</h1><p id="subtitle">Remembering lives, preserving stories, and honouring places of remembrance</p><button class="lang-btn" id="langToggle" type="button">🌐 <span id="langLabel">فارسی</span></button></div></header>
-<main class="main">
-<aside class="sidebar">
-<section class="section"><h2 id="searchTitle">Find a memorial place</h2><div class="search-wrap"><input id="searchInput" type="search" placeholder="Search memorial names or stories" aria-label="Search memorial sites"><button id="searchBtn" type="button" aria-label="Search">🔍</button></div><div id="searchResults" class="search-results" aria-live="polite"></div></section>
-<section class="section"><h2 id="memorialTitle">Community memorial map</h2><div class="stats"><div class="stat-number" id="siteCount">0</div><div class="stat-label" id="countLabel">memorial places in this session</div></div><p class="poem" id="tribute">May every life be remembered with dignity, and every story carried forward with care.</p><div class="location"><span aria-hidden="true">📍</span> <span id="locationText">The Gambia, West Africa</span></div></section>
-<section class="section"><h2 id="contributeTitle">Add a place of remembrance</h2><p class="about" id="contributeText">Choose “Add point”, then click the map and enter a place name and a short note. New entries stay in this browser session until you export them.</p><div class="actions"><button id="addPoint" type="button">❤️ Add point</button><button id="cancelAdd" type="button" class="secondary" disabled>Cancel</button></div><label for="geoFile" class="about" style="display:block;margin:10px 0 5px" id="uploadLabel">Or load memorial locations (GeoJSON)</label><input id="geoFile" type="file" accept=".json,.geojson,application/json,application/geo+json"></section>
-<section class="section"><h2 id="aboutTitle">About this map</h2><p class="about" id="aboutText">A respectful, community-led map for recording places of remembrance across The Gambia. It begins with no preloaded memorial claims or visitor totals; locations may be added locally or loaded from GeoJSON.</p><p class="disclaimer" id="disclaimer">Entries are user-provided and are not independently verified or officially endorsed. Please obtain consent and verify details before sharing memorial information.</p></section>
-<section class="section"><h2 id="dataTitle">Map data</h2><div class="actions"><button id="exportGeo" type="button" class="outline">Export GeoJSON</button><button id="clearSites" type="button" class="secondary">Clear session</button></div><p class="disclaimer" id="mapAttribution">Map tiles © OpenStreetMap contributors. An internet connection is needed to load the basemap.</p></section>
-</aside>
-<div class="map-wrap"><div id="map" role="application" aria-label="Interactive map of The Gambia"></div><div class="map-caption" id="mapCaption">The Gambia • Click “Add point” to create a local draft</div></div>
-</main><footer id="footer">Community remembrance map • The Gambia</footer></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<body>
+<header>
+ <div class="brand"><div class="logo">G</div><div>
+  <h1>GBoS GEOAI | GAMBIA URBAN ENERGY INTELLIGENCE</h1>
+  <small>Urban Energy • Population • Buildings • Positive Energy District Scenario</small>
+ </div></div>
+ <div class="header-right"><span class="status-dot" id="connectionDot"></span><span id="globalStatus">INITIALISING ONLINE DATA</span><br>GIS / CARTOGRAPHY UNIT</div>
+</header>
+
+<main>
+<section class="panel">
+ <div class="panel-head"><h2>01 / CONTROLS & ONLINE DATA</h2><p>Administrative selection, data retrieval and scenario assumptions</p></div>
+ <div class="panel-body">
+  <div class="section">
+   <div class="section-title">ADMINISTRATIVE AREA</div>
+   <label for="regionSelect">Region</label><select id="regionSelect"><option value="">Loading regions...</option></select>
+   <label for="districtSelect">District</label><select id="districtSelect" disabled><option value="">Select a region first</option></select>
+   <div class="btn-row"><button id="runBtn">RUN ANALYSIS</button><button class="secondary" id="resetBtn">RESET</button></div>
+  </div>
+  <div class="section">
+   <div class="section-title">POPULATION & HOUSEHOLDS</div>
+   <label for="yearSelect">Population reference year</label>
+   <select id="yearSelect"><option>2025</option><option>2024</option><option selected>2023</option><option>2022</option><option>2021</option><option>2020</option></select>
+   <label for="hhSize">Average household size (persons)</label><input id="hhSize" type="number" min="1" max="20" step=".1" value="8">
+   <div class="note" style="margin-top:8px">Observed household totals are used when compatible census attributes are found. Otherwise household totals are modelled from population and the assumed household size.</div>
+  </div>
+  <div class="section">
+   <div class="section-title">ENERGY SCENARIO ASSUMPTIONS</div>
+   <label for="dailyUse">Residential electricity use (kWh / household / day)</label><input id="dailyUse" type="number" min=".1" step=".1" value="2.5">
+   <label for="commercialShare">Commercial / public demand (% of residential)</label><input id="commercialShare" type="number" min="0" max="300" step="5" value="25">
+   <label for="electrification">Electrification coverage (%)</label><input id="electrification" type="number" min="0" max="100" value="75">
+   <label for="efficiency">Energy efficiency improvement (%)</label><input id="efficiency" type="number" min="0" max="90" value="20">
+   <label for="pvCoverage">Households with rooftop solar (%)</label><input id="pvCoverage" type="number" min="0" max="100" value="40">
+   <label for="pvSize">PV capacity per participating household (kWp)</label><input id="pvSize" type="number" min=".1" step=".1" value="2.5">
+   <label for="solarYield">Solar generation yield (kWh / kWp / day)</label><input id="solarYield" type="number" min=".1" step=".1" value="4.5">
+   <label for="batteryHours">Battery autonomy (hours)</label><input id="batteryHours" type="number" min="0" max="48" step="1" value="6">
+   <div class="btn-row"><button class="secondary" id="recalculateBtn">RECALCULATE SCENARIO</button></div>
+  </div>
+  <div class="section">
+   <div class="section-title">ONLINE DATA CONNECTIONS</div>
+   <div class="status-list">
+    <div class="status-item"><span>National boundary</span><b id="sAdm0" class="status-value waiting">Waiting</b></div>
+    <div class="status-item"><span>Regional boundaries</span><b id="sAdm1" class="status-value waiting">Waiting</b></div>
+    <div class="status-item"><span>District boundaries</span><b id="sAdm2" class="status-value waiting">Waiting</b></div>
+    <div class="status-item"><span>Repository population</span><b id="sPopulation" class="status-value waiting">Waiting</b></div>
+    <div class="status-item"><span>OSM buildings</span><b id="sBuildings" class="status-value waiting">Not requested</b></div>
+    <div class="status-item"><span>GBoS household totals</span><b id="sHouseholds" class="status-value waiting">Waiting</b></div>
+    <div class="status-item"><span>NAWEC electricity consumption</span><b id="sNawec" class="status-value bad">Not connected</b></div>
+   </div>
+  </div>
+  <div class="section">
+   <div class="section-title">EXPORTS</div>
+   <div class="btn-row"><button class="secondary" id="csvBtn">EXPORT CSV</button><button class="secondary" id="jsonBtn">EXPORT JSON</button></div>
+   <div class="btn-row"><button class="secondary" id="geoBtn">EXPORT SELECTED AREA GEOJSON</button></div>
+  </div>
+  <div class="note" id="message">Starting application. Loading administrative boundaries and repository datasets.</div>
+ </div>
+</section>
+
+<section id="mapWrap">
+ <div id="map"></div>
+ <div class="map-overlay"><strong id="mapTitle">THE GAMBIA | NATIONAL VIEW</strong><span id="mapSubtitle">Satellite imagery • Administrative boundaries • Urban energy intelligence</span></div>
+ <div class="map-legend">
+  <div><span class="legend-line" style="background:#35c6dc"></span>National boundary</div>
+  <div><span class="legend-line" style="background:#f5a524"></span>Regional boundary</div>
+  <div><span class="legend-line" style="background:#f472b6"></span>District boundary</div>
+  <div><span class="legend-line" style="background:#34d399"></span>Selected area</div>
+  <div><span style="color:#60a5fa">●</span> OSM building footprints</div>
+ </div>
+ <div class="map-attribution">Satellite imagery © Esri</div>
+</section>
+
+<section class="panel">
+ <div class="panel-head"><h2>02 / SPATIAL & ENERGY ANALYTICS</h2><p id="analyticsArea">The Gambia • National overview</p></div>
+ <div class="panel-body">
+  <div class="section"><div class="section-title">AREA PROFILE</div>
+   <div class="kpi-grid">
+    <div class="kpi"><div class="k-label">Population</div><div class="k-value" id="kPopulation">—</div><div class="k-unit">persons • repository data</div></div>
+    <div class="kpi"><div class="k-label">Households</div><div class="k-value" id="kHouseholds">—</div><div class="k-unit" id="hhUnit">Observed or modelled</div></div>
+    <div class="kpi"><div class="k-label">OSM building features</div><div class="k-value" id="kBuildings">—</div><div class="k-unit">mapped features</div></div>
+    <div class="kpi"><div class="k-label">Area</div><div class="k-value" id="kArea">—</div><div class="k-unit">km² • boundary geometry</div></div>
+   </div>
+  </div>
+  <div class="section"><div class="section-title">ENERGY SCENARIO INDICATORS</div>
+   <div class="kpi-grid">
+    <div class="kpi"><div class="k-label">Daily electricity demand</div><div class="k-value" id="kDemand">—</div><div class="k-unit">MWh / day</div></div>
+    <div class="kpi"><div class="k-label">Annual electricity demand</div><div class="k-value" id="kAnnual">—</div><div class="k-unit">GWh / year</div></div>
+    <div class="kpi"><div class="k-label">Potential daily PV generation</div><div class="k-value" id="kPV">—</div><div class="k-unit">MWh / day</div></div>
+    <div class="kpi"><div class="k-label">Indicative PV capacity</div><div class="k-value" id="kCapacity">—</div><div class="k-unit">MWp</div></div>
+    <div class="kpi"><div class="k-label">Battery storage requirement</div><div class="k-value" id="kStorage">—</div><div class="k-unit">MWh • indicative</div></div>
+    <div class="kpi"><div class="k-label">PV share of demand</div><div class="k-value" id="kShare">—</div><div class="k-unit">potential daily energy ratio</div></div>
+   </div>
+  </div>
+  <div class="section"><div class="section-title">ENERGY ANALYTICS</div>
+   <div class="chart-box"><h3>Daily electricity demand and PV generation</h3><canvas id="energyChart"></canvas></div>
+   <div class="chart-box"><h3>Energy demand composition</h3><canvas id="compositionChart"></canvas></div>
+   <div class="chart-box"><h3>Scenario coverage indicators</h3><canvas id="coverageChart"></canvas></div>
+   <div class="chart-box"><h3>Population and household profile</h3><canvas id="populationChart"></canvas></div>
+  </div>
+  <div class="section"><div class="section-title">INTERPRETATION & DATA LIMITATIONS</div>
+   <div class="note" id="interpretation">Select an administrative area and run the analysis.</div>
+   <div class="analytics-note">Energy results are planning scenarios derived from user-defined assumptions. They are not measured electricity consumption, NAWEC customer data, a grid simulation, or a certified Positive Energy District assessment. OSM building footprints represent mapped features and may be incomplete. Population and household totals depend on the available repository attributes.</div>
+  </div>
+  <footer>Produced by Ansu Singhateh<br>GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>GBoS GEOAI • Research and educational use</footer>
+ </div>
+</section>
+</main>
+
 <script>
-'use strict';
-const map=L.map('map',{scrollWheelZoom:true}).setView([13.45,-15.45],8);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(map);
-const group=L.featureGroup().addTo(map);let sites=[];let adding=false;let language='en';
-const heartIcon=L.divIcon({className:'heart-marker',html:'❤️',iconSize:[28,28],iconAnchor:[14,14]});
-const copy={en:{title:'The Gambia Memorial Map',subtitle:'Remembering lives, preserving stories, and honouring places of remembrance',searchTitle:'Find a memorial place',placeholder:'Search memorial names or stories',memorialTitle:'Community memorial map',countLabel:'memorial places in this session',tribute:'May every life be remembered with dignity, and every story carried forward with care.',location:'The Gambia, West Africa',contributeTitle:'Add a place of remembrance',contributeText:'Choose “Add point”, then click the map and enter a place name and a short note. New entries stay in this browser session until you export them.',add:'❤️ Add point',cancel:'Cancel',upload:'Or load memorial locations (GeoJSON)',aboutTitle:'About this map',aboutText:'A respectful, community-led map for recording places of remembrance across The Gambia. It begins with no preloaded memorial claims or visitor totals; locations may be added locally or loaded from GeoJSON.',disclaimer:'Entries are user-provided and are not independently verified or officially endorsed. Please obtain consent and verify details before sharing memorial information.',dataTitle:'Map data',export:'Export GeoJSON',clear:'Clear session',attribution:'Map tiles © OpenStreetMap contributors. An internet connection is needed to load the basemap.',caption:'The Gambia • Click “Add point” to create a local draft',footer:'Community remembrance map • The Gambia',searchEmpty:'No matching memorial locations.',searchHint:'Search loaded or locally added places.',promptName:'Place or memorial name:',promptNote:'Short note (optional):',added:'Local draft added. Export GeoJSON to save it.',invalid:'Could not read GeoJSON. Use a FeatureCollection with Point features.',confirmClear:'Remove all memorial locations from this session?',popupNote:'Community-submitted location',language:'فارسی'},fa:{title:'نقشه یادمان گامبیا',subtitle:'یادبود زندگی‌ها، حفظ روایت‌ها و پاسداشت مکان‌های یادبود',searchTitle:'جستجوی مکان یادبود',placeholder:'نام یا روایت یادمان را جستجو کنید',memorialTitle:'نقشه یادمان مردمی',countLabel:'مکان یادبود در این نشست',tribute:'باشد که یاد هر انسان با کرامت گرامی داشته شود و هر روایت با مهر ادامه یابد.',location:'گامبیا، آفریقای غربی',contributeTitle:'افزودن مکان یادبود',contributeText:'«افزودن نقطه» را انتخاب کنید، سپس روی نقشه کلیک کنید و نام مکان و یادداشتی کوتاه وارد کنید. موارد جدید تا زمان خروجی گرفتن فقط در همین نشست مرورگر باقی می‌مانند.',add:'❤️ افزودن نقطه',cancel:'لغو',upload:'یا بارگذاری مکان‌های یادبود (GeoJSON)',aboutTitle:'درباره این نقشه',aboutText:'نقشه‌ای مردمی و محترمانه برای ثبت مکان‌های یادبود در گامبیا. هیچ ادعا یا آمار بازدید از پیش بارگذاری نشده است؛ مکان‌ها را می‌توان به‌صورت محلی افزود یا از GeoJSON بارگذاری کرد.',disclaimer:'اطلاعات توسط کاربران ارائه می‌شود و به‌طور مستقل تأیید نشده یا مورد تأیید رسمی نیست. پیش از انتشار اطلاعات یادبود، رضایت افراد را جلب و جزئیات را بررسی کنید.',dataTitle:'داده‌های نقشه',export:'خروجی GeoJSON',clear:'پاک‌کردن نشست',attribution:'کاشی‌های نقشه © مشارکت‌کنندگان OpenStreetMap. بارگیری نقشه پایه به اینترنت نیاز دارد.',caption:'گامبیا • برای ایجاد پیش‌نویس محلی «افزودن نقطه» را بزنید',footer:'نقشه یادبود مردمی • گامبیا',searchEmpty:'مکان یادبود همخوانی یافت نشد.',searchHint:'مکان‌های بارگذاری‌شده یا افزوده‌شده را جستجو کنید.',promptName:'نام مکان یا یادمان:',promptNote:'یادداشت کوتاه (اختیاری):',added:'پیش‌نویس محلی افزوده شد. برای ذخیره، خروجی GeoJSON بگیرید.',invalid:'GeoJSON خوانده نشد. از FeatureCollection با عوارض Point استفاده کنید.',confirmClear:'همه مکان‌های یادبود این نشست پاک شوند؟',popupNote:'مکان ثبت‌شده توسط جامعه',language:'English'}};
-function t(k){return copy[language][k]}
-function escapeHTML(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function applyLanguage(){const c=copy[language];document.documentElement.lang=language==='fa'?'fa':'en';document.documentElement.dir=language==='fa'?'rtl':'ltr';for(const [id,key] of [['title','title'],['subtitle','subtitle'],['searchTitle','searchTitle'],['memorialTitle','memorialTitle'],['countLabel','countLabel'],['tribute','tribute'],['locationText','location'],['contributeTitle','contributeTitle'],['contributeText','contributeText'],['addPoint','add'],['cancelAdd','cancel'],['uploadLabel','upload'],['aboutTitle','aboutTitle'],['aboutText','aboutText'],['disclaimer','disclaimer'],['dataTitle','dataTitle'],['exportGeo','export'],['clearSites','clear'],['mapAttribution','attribution'],['mapCaption','caption'],['footer','footer'],['langLabel','language']])document.getElementById(id).textContent=c[key];document.getElementById('searchInput').placeholder=c.placeholder;document.getElementById('langToggle').setAttribute('aria-label',c.language)}
-function setCount(){document.getElementById('siteCount').textContent=sites.length.toLocaleString()}
-function safePopup(site){return `<div class="popup-title">${escapeHTML(site.name)}</div><div class="popup-meta">${escapeHTML(site.note||t('popupNote'))}</div>`}
-function addSite(site){const marker=L.marker([site.lat,site.lng],{icon:heartIcon}).bindPopup(safePopup(site));site.marker=marker;group.addLayer(marker);sites.push(site);setCount()}
-function findSites(q){const term=q.trim().toLowerCase(),results=document.getElementById('searchResults');results.replaceChildren();if(!term){const p=document.createElement('p');p.className='disclaimer';p.textContent=t('searchHint');results.appendChild(p);return}const hits=sites.filter(s=>(s.name+' '+s.note).toLowerCase().includes(term)).slice(0,20);if(!hits.length){const p=document.createElement('p');p.className='disclaimer';p.textContent=t('searchEmpty');results.appendChild(p);return}hits.forEach(s=>{const el=document.createElement('div');el.className='result';el.textContent=s.name;el.onclick=()=>{map.setView([s.lat,s.lng],14);s.marker.openPopup()};results.appendChild(el)})}
-document.getElementById('searchBtn').onclick=()=>findSites(document.getElementById('searchInput').value);document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')findSites(e.target.value)});document.getElementById('searchInput').addEventListener('input',e=>findSites(e.target.value));
-document.getElementById('langToggle').onclick=()=>{language=language==='en'?'fa':'en';applyLanguage();findSites(document.getElementById('searchInput').value)};
-document.getElementById('addPoint').onclick=()=>{adding=true;document.getElementById('addPoint').disabled=true;document.getElementById('cancelAdd').disabled=false;document.getElementById('map').style.cursor='crosshair'};document.getElementById('cancelAdd').onclick=()=>{adding=false;document.getElementById('addPoint').disabled=false;document.getElementById('cancelAdd').disabled=true;document.getElementById('map').style.cursor=''};
-map.on('click',e=>{if(!adding)return;const name=prompt(t('promptName'));if(name&&name.trim()){const note=prompt(t('promptNote'))||'';addSite({name:name.trim(),note:note.trim(),lat:e.latlng.lat,lng:e.latlng.lng});document.getElementById('searchInput').value='';findSites('');document.getElementById('mapCaption').textContent=t('added')}document.getElementById('cancelAdd').click()});
-document.getElementById('geoFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.type!=='FeatureCollection'||!Array.isArray(data.features))throw Error('invalid');const incoming=data.features.filter(f=>f.geometry?.type==='Point'&&Array.isArray(f.geometry.coordinates)).map(f=>({name:String(f.properties?.name||f.properties?.title||'Memorial place'),note:String(f.properties?.note||f.properties?.description||''),lng:Number(f.geometry.coordinates[0]),lat:Number(f.geometry.coordinates[1])})).filter(s=>Number.isFinite(s.lat)&&Number.isFinite(s.lng));if(!incoming.length)throw Error('invalid');incoming.forEach(addSite);map.fitBounds(group.getBounds(),{padding:[25,25],maxZoom:12});findSites('');document.getElementById('mapCaption').textContent=`Loaded ${incoming.length} memorial location(s).`}catch(err){alert(t('invalid'))}finally{e.target.value=''}});
-document.getElementById('exportGeo').onclick=()=>{const features=sites.map(s=>({type:'Feature',geometry:{type:'Point',coordinates:[s.lng,s.lat]},properties:{name:s.name,note:s.note}}));const blob=new Blob([JSON.stringify({type:'FeatureCollection',name:'The_Gambia_Memorial_Places',features},null,2)],{type:'application/geo+json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='The_Gambia_Memorial_Places.geojson';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-document.getElementById('clearSites').onclick=()=>{if(!confirm(t('confirmClear')))return;group.clearLayers();sites=[];setCount();findSites('');document.getElementById('mapCaption').textContent=t('caption')};
-applyLanguage();setCount();findSites('');
-</script></body></html>
+"use strict";
+
+/* ============================================================
+   CONFIGURATION
+============================================================ */
+const REPO="https://raw.githubusercontent.com/silkysingz94-oss/Gambia_Urban_Energy_Digital_Twin1/main/";
+const DATA_URLS={
+ population:REPO+"population.geojson",
+ census:REPO+"Census_EAs_Geo.json",
+ csv:REPO+"Census_2013_2023.csv"
+};
+const BOUNDARY_ENDPOINTS=[
+ "https://www.geoboundaries.org/api/current/gbOpen/GMB/",
+ "https://geoboundaries-dev.org/api/current/gbOpen/GMB/"
+];
+const OVERPASS_ENDPOINTS=[
+ "https://overpass-api.de/api/interpreter",
+ "https://overpass.kumi.systems/api/interpreter"
+];
+const $=id=>document.getElementById(id);
+const fmt=(v,d=1)=>Number.isFinite(Number(v))?Number(v).toLocaleString("en-US",{maximumFractionDigits:d}):"—";
+const state={
+ national:null,regions:null,districts:null,
+ selectedRegion:null,selectedDistrict:null,
+ population:null,observedHouseholds:null,householdSource:null,
+ populationSource:null,buildings:null,buildingCount:0,
+ energy:null,areaKm2:null,repo:null,
+ layers:{national:null,regions:null,districts:null,selected:null,buildings:null},
+ charts:{}
+};
+function setStatus(id,text,kind="waiting"){
+ const el=$(id);if(el){el.textContent=text;el.className="status-value "+kind;}
+}
+function setMessage(s){$("message").textContent=s;}
+function setGlobal(s,good=false){$("globalStatus").textContent=s;$("connectionDot").style.background=good?"#34d399":"#f5a524";}
+function featureCollection(features){return {type:"FeatureCollection",features};}
+function normalise(s){return String(s??"").trim().toLowerCase().replace(/[^a-z0-9]/g,"");}
+function featureName(f){
+ const p=f?.properties||{};
+ const keys=["shapeName","shapeName_en","NAME_1","NAME_2","ADM1_EN","ADM2_EN","admin1Name","admin2Name","name","NAME","name_1","name_2","region","Region","district","District","admin","lganame","distname"];
+ for(const k of keys)if(p[k]!=null&&String(p[k]).trim())return String(p[k]).trim();
+ return "Unnamed area";
+}
+function findFeature(fc,name){
+ if(!fc?.features)return null;
+ return fc.features.find(f=>normalise(featureName(f))===normalise(name))||null;
+}
+function populateSelect(el,features,placeholder){
+ el.innerHTML="";
+ const first=document.createElement("option");first.value="";first.textContent=placeholder;el.appendChild(first);
+ (features||[]).slice().sort((a,b)=>featureName(a).localeCompare(featureName(b))).forEach(f=>{
+  const o=document.createElement("option");o.value=featureName(f);o.textContent=featureName(f);el.appendChild(o);
+ });
+}
+
+/* ============================================================
+   FIXED ESRI WORLD IMAGERY MAP
+============================================================ */
+const map=L.map("map",{zoomControl:true,preferCanvas:true}).setView([13.45,-15.5],8);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{
+ maxZoom:19,attribution:"Tiles © Esri"
+}).addTo(map);
+
+function fitFeature(f){
+ if(!f?.geometry)return;
+ try{const b=L.geoJSON(f).getBounds();if(b.isValid())map.fitBounds(b,{padding:[30,30],maxZoom:14});}catch(e){console.warn(e);}
+}
+function drawLayer(key,geojson,style){
+ if(state.layers[key])map.removeLayer(state.layers[key]);
+ if(!geojson?.features?.length)return;
+ state.layers[key]=L.geoJSON(geojson,{style}).addTo(map);
+}
+function drawBoundaries(){
+ drawLayer("national",state.national,{color:"#35c6dc",weight:2,fillOpacity:.01});
+ drawLayer("regions",state.regions,{color:"#f5a524",weight:1.5,fillOpacity:.01});
+ drawLayer("districts",state.districts,{color:"#f472b6",weight:1,fillOpacity:.005});
+}
+function drawSelected(f){
+ if(state.layers.selected)map.removeLayer(state.layers.selected);
+ if(!f)return;
+ state.layers.selected=L.geoJSON(f,{style:{color:"#34d399",weight:3,fillColor:"#34d399",fillOpacity:.12}}).addTo(map);
+ fitFeature(f);
+}
+
+/* ============================================================
+   LOAD ADMINISTRATIVE BOUNDARIES
+============================================================ */
+async function getBoundary(level){
+ let lastError=null;
+ for(const base of BOUNDARY_ENDPOINTS){
+  try{
+   const r=await fetch(base+level+"/",{cache:"no-store",headers:{Accept:"application/json"}});
+   if(!r.ok)throw Error("Metadata HTTP "+r.status);
+   const meta=await r.json();
+   const url=meta.gjDownloadURL||meta.simplifiedGeometryGeoJSON||meta.geoJSON;
+   if(!url)throw Error("No GeoJSON download URL");
+   const g=await fetch(url,{cache:"no-store"});
+   if(!g.ok)throw Error("GeoJSON HTTP "+g.status);
+   const data=await g.json();
+   if(data.type!=="FeatureCollection"||!Array.isArray(data.features)||!data.features.length)throw Error("Invalid or empty GeoJSON");
+   return data;
+  }catch(e){lastError=e;console.warn("Boundary source:",base,level,e);}
+ }
+ throw lastError||Error("No boundary source available");
+}
+async function loadBoundaries(){
+ const levels=[
+  ["ADM0","national","sAdm0"],
+  ["ADM1","regions","sAdm1"],
+  ["ADM2","districts","sAdm2"]
+ ];
+ const results=await Promise.allSettled(levels.map(x=>getBoundary(x[0])));
+ results.forEach((r,i)=>{
+  const [,key,status]=levels[i];
+  if(r.status==="fulfilled"){state[key]=r.value;setStatus(status,"Loaded","good");}
+  else{console.error(r.reason);setStatus(status,"Failed","bad");}
+ });
+ if(state.regions)populateSelect($("regionSelect"),state.regions.features,"Select a region");
+ else $("regionSelect").innerHTML='<option value="">Regions unavailable</option>';
+ drawBoundaries();
+ if(state.national)fitFeature(state.national.features[0]);
+ setGlobal(state.national||state.regions?"BOUNDARIES LOADED":"BOUNDARY SOURCE ERROR",!!(state.national||state.regions));
+ setMessage("Administrative boundaries loaded. Select a region or district and run analysis.");
+}
+
+/* ============================================================
+   REPOSITORY GEOJSON LOADER
+============================================================ */
+async function fetchGeoJSON(url){
+ const r=await fetch(url,{cache:"no-store",headers:{Accept:"application/geo+json, application/json"}});
+ if(!r.ok)throw Error("HTTP "+r.status+" loading "+url);
+ const j=await r.json();
+ if(j.type==="FeatureCollection"&&Array.isArray(j.features))return j;
+ if(j.type==="Feature")return featureCollection([j]);
+ throw Error("Invalid GeoJSON response: "+url);
+}
+async function loadRepository(){
+ if(state.repo)return state.repo;
+ const results=await Promise.allSettled([
+  fetchGeoJSON(DATA_URLS.population),
+  fetchGeoJSON(DATA_URLS.census)
+ ]);
+ state.repo={
+  population:results[0].status==="fulfilled"?results[0].value:null,
+  census:results[1].status==="fulfilled"?results[1].value:null
+ };
+ if(!state.repo.population&&!state.repo.census){
+  state.repo=null;
+  throw Error("Could not load population.geojson or Census_EAs_Geo.json. Check repository visibility, filenames and browser network access.");
+ }
+ console.info("Repository data loaded",{
+  populationFeatures:state.repo.population?.features.length||0,
+  censusFeatures:state.repo.census?.features.length||0
+ });
+ return state.repo;
+}
+
+/* ============================================================
+   FIELD DETECTION AND SPATIAL AGGREGATION
+============================================================ */
+function findNumericProperty(properties,preferred){
+ const p=properties||{},lower={};
+ Object.keys(p).forEach(k=>lower[k.toLowerCase()]=p[k]);
+ for(const name of preferred){
+  const value=p[name]!==undefined?p[name]:lower[name.toLowerCase()];
+  if(value===undefined||value===null||value==="")continue;
+  const n=Number(String(value).replace(/,/g,""));
+  if(Number.isFinite(n)&&n>=0)return {value:n,field:name};
+ }
+ return null;
+}
+function aggregateByArea(fc,area,keys){
+ if(!fc?.features?.length||!area)return null;
+ let sum=0,count=0,field=null;
+ for(const f of fc.features){
+  if(!f?.geometry)continue;
+  const v=findNumericProperty(f.properties,keys);
+  if(!v)continue;
+  try{
+   let testFeature;
+   if(f.geometry.type==="Point")testFeature=turf.point(f.geometry.coordinates);
+   else testFeature=turf.centroid(f);
+   if(turf.booleanPointInPolygon(testFeature,area)){
+    sum+=v.value;count++;field=v.field;
+   }
+  }catch(e){}
+ }
+ return count?{sum,count,field}:null;
+}
+const POP_FIELDS=[
+ "population","pop","pop_total","total_pop","sum_pop","pop2023","pop_2023",
+ "population_total","worldpop","value","population_count","total_population"
+];
+const HH_FIELDS=[
+ "sum_hhs","households","household","hh_total","total_hh","hh_count",
+ "households_total","number_of_households","hhs","hh","total_households"
+];
+async function loadPopulationAndHouseholds(area){
+ setStatus("sPopulation","Loading repository...","waiting");
+ setStatus("sHouseholds","Loading...","waiting");
+ state.population=null;state.observedHouseholds=null;state.householdSource=null;
+ try{
+  const repo=await loadRepository();
+  let pop=repo.population?aggregateByArea(repo.population,area,POP_FIELDS):null;
+  let popSource="population.geojson";
+  if(!pop&&repo.census){pop=aggregateByArea(repo.census,area,POP_FIELDS);popSource="Census_EAs_Geo.json";}
+  let hh=repo.census?aggregateByArea(repo.census,area,HH_FIELDS):null;
+  let hhSource="Census_EAs_Geo.json";
+  if(!hh&&repo.population){hh=aggregateByArea(repo.population,area,HH_FIELDS);hhSource="population.geojson";}
+  if(pop){
+   state.population=pop.sum;state.populationSource=popSource;
+   setStatus("sPopulation","Loaded • "+popSource,"good");
+   $("kPopulation").textContent=fmt(pop.sum,0);
+  }else{
+   setStatus("sPopulation","No population field","bad");
+   $("kPopulation").textContent="—";
+  }
+  if(hh){
+   state.observedHouseholds=hh.sum;state.householdSource=hhSource+" / "+hh.field;
+   setStatus("sHouseholds","Loaded • census","good");
+   $("hhUnit").textContent="Observed • "+hh.field;
+  }else{
+   setStatus("sHouseholds","No HH attribute","waiting");
+   $("hhUnit").textContent="Modelled from population";
+  }
+  if(!pop)throw Error("Repository GeoJSON was retrieved, but no recognised population property was found. Inspect the source field names and add the correct field to POP_FIELDS.");
+  return pop.sum;
+ }catch(e){
+  console.error("Population/census retrieval:",e);
+  state.population=null;state.observedHouseholds=null;
+  setStatus("sPopulation","Unavailable","bad");
+  setStatus("sHouseholds","Unavailable","bad");
+  $("kPopulation").textContent="—";
+  return null;
+ }
+}
+
+/* ============================================================
+   OPENSTREETMAP BUILDINGS — SMALLER AREA REQUESTS
+============================================================ */
+async function overpassRequest(query){
+ let lastError=null;
+ for(const endpoint of OVERPASS_ENDPOINTS){
+  try{
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),25000);
+   const r=await fetch(endpoint,{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+    body:"data="+encodeURIComponent(query),
+    signal:controller.signal
+   });
+   clearTimeout(timeout);
+   if(!r.ok)throw Error("Overpass HTTP "+r.status);
+   return await r.json();
+  }catch(e){lastError=e;console.warn("Overpass fallback:",endpoint,e);}
+ }
+ throw lastError||Error("No Overpass endpoint responded");
+}
+async function loadBuildings(area){
+ if(!area)return;
+ const areaKm2=turf.area(area)/1e6;
+ if(areaKm2>2500){
+  setStatus("sBuildings","Select smaller area","waiting");
+  $("kBuildings").textContent="—";state.buildingCount=0;state.buildings=null;
+  return;
+ }
+ setStatus("sBuildings","Loading area tiles...","waiting");
+ $("kBuildings").textContent="…";
+ state.buildings=null;state.buildingCount=0;
+ try{
+  const b=turf.bbox(area),west=b[0],south=b[1],east=b[2],north=b[3];
+  const nx=2,ny=2,found=new Map();
+  for(let iy=0;iy<ny;iy++){
+   for(let ix=0;ix<nx;ix++){
+    const x1=west+(east-west)*ix/nx;
+    const x2=west+(east-west)*(ix+1)/nx;
+    const y1=south+(north-south)*iy/ny;
+    const y2=south+(north-south)*(iy+1)/ny;
+    const bbox=[y1,x1,y2,x2].join(",");
+    const query='[out:json][timeout:20];way["building"]('+bbox+');out body geom;';
+    const payload=await overpassRequest(query);
+    for(const el of payload.elements||[]){
+     if(el.type!=="way"||!Array.isArray(el.geometry)||el.geometry.length<3||found.has(el.id))continue;
+     const coords=el.geometry.map(p=>[p.lon,p.lat]);
+     const first=coords[0],last=coords[coords.length-1];
+     if(first[0]!==last[0]||first[1]!==last[1])coords.push(first);
+     try{
+      const poly=turf.polygon([coords],{osm_id:el.id,building:el.tags?.building||"yes"});
+      if(turf.booleanIntersects(poly,area))found.set(el.id,poly);
+     }catch(e){}
+    }
+   }
+  }
+  const features=[...found.values()];
+  if(!features.length)throw Error("No building footprints returned for this area.");
+  state.buildings=featureCollection(features);
+  state.buildingCount=features.length;
+  if(state.layers.buildings)map.removeLayer(state.layers.buildings);
+  state.layers.buildings=L.geoJSON(state.buildings,{
+   style:{color:"#60a5fa",weight:.5,fillColor:"#3b82f6",fillOpacity:.32}
+  }).addTo(map);
+  $("kBuildings").textContent=fmt(features.length,0);
+  setStatus("sBuildings","Loaded • "+fmt(features.length,0),"good");
+ }catch(e){
+  console.warn("OSM buildings:",e);
+  state.buildings=null;state.buildingCount=0;
+  $("kBuildings").textContent="—";
+  setStatus("sBuildings","Unavailable / timed out","bad");
+ }
+}
+
+/* ============================================================
+   SELECTED AREA AND ADMIN SELECTORS
+============================================================ */
+function selectedFeature(){
+ return state.selectedDistrict||state.selectedRegion||state.national?.features?.[0]||null;
+}
+function updateDistrictOptions(){
+ const name=$("regionSelect").value;
+ state.selectedRegion=name?findFeature(state.regions,name):null;
+ state.selectedDistrict=null;
+ $("districtSelect").value="";
+ if(!name||!state.districts){
+  populateSelect($("districtSelect"),[],"Select a region first");
+  $("districtSelect").disabled=true;return;
+ }
+ let list=state.districts.features;
+ if(state.selectedRegion){
+  try{list=list.filter(f=>turf.booleanPointInPolygon(turf.centroid(f),state.selectedRegion));}catch(e){}
+ }
+ populateSelect($("districtSelect"),list,"Select a district");
+ $("districtSelect").disabled=false;
+}
+function updateAreaLabels(f){
+ const name=f?featureName(f):"The Gambia";
+ $("mapTitle").textContent=name.toUpperCase()+" | URBAN ENERGY VIEW";
+ $("mapSubtitle").textContent=state.selectedDistrict?"Selected district • "+($("regionSelect").value||"The Gambia"):"Selected administrative area • The Gambia";
+ $("analyticsArea").textContent=name+" • "+(state.selectedDistrict?"District":state.selectedRegion?"Region":"National overview");
+ state.areaKm2=f?turf.area(f)/1e6:null;
+ $("kArea").textContent=state.areaKm2?fmt(state.areaKm2,2):"—";
+}
+$("regionSelect").addEventListener("change",async()=>{
+ updateDistrictOptions();
+ const f=selectedFeature();
+ if(f){drawSelected(f);updateAreaLabels(f);await runAnalysis();}
+});
+$("districtSelect").addEventListener("change",async()=>{
+ state.selectedDistrict=findFeature(state.districts,$("districtSelect").value);
+ const f=selectedFeature();
+ if(f){drawSelected(f);updateAreaLabels(f);await runAnalysis();}
+});
+
+/* ============================================================
+   ENERGY SCENARIO MODEL
+============================================================ */
+function inputNumber(id,min=0){
+ const n=Number($(id).value);
+ return Number.isFinite(n)?Math.max(min,n):min;
+}
+function clearEnergy(){
+ ["kHouseholds","kDemand","kAnnual","kPV","kCapacity","kStorage","kShare"].forEach(id=>$(id).textContent="—");
+ state.energy=null;updateCharts(null);
+}
+function calculateEnergy(){
+ const pop=state.population;
+ if(!Number.isFinite(pop)){
+  clearEnergy();
+  $("interpretation").textContent="No valid population attribute is available for the selected area. The energy model has not generated a population or consumption value.";
+  return null;
+ }
+ const householdSize=Math.max(1,inputNumber("hhSize",1));
+ const households=Number.isFinite(state.observedHouseholds)?state.observedHouseholds:pop/householdSize;
+ const dailyUse=inputNumber("dailyUse",0);
+ const commercial=inputNumber("commercialShare",0)/100;
+ const electrification=Math.min(100,inputNumber("electrification",0))/100;
+ const efficiency=Math.min(90,inputNumber("efficiency",0))/100;
+ const pvCoverage=Math.min(100,inputNumber("pvCoverage",0))/100;
+ const pvSize=inputNumber("pvSize",0);
+ const solarYield=inputNumber("solarYield",0);
+ const batteryHours=inputNumber("batteryHours",0);
+ const connectedHouseholds=households*electrification;
+ const residentialDaily=connectedHouseholds*dailyUse*(1-efficiency);
+ const commercialDaily=residentialDaily*commercial;
+ const totalDaily=residentialDaily+commercialDaily;
+ const annualKwh=totalDaily*365;
+ const participatingHouseholds=households*pvCoverage;
+ const pvCapacityKwp=participatingHouseholds*pvSize;
+ const pvDailyKwh=pvCapacityKwp*solarYield;
+ const batteryKwh=participatingHouseholds*dailyUse*(batteryHours/24);
+ const pvShare=totalDaily>0?pvDailyKwh/totalDaily*100:0;
+ state.energy={population:pop,households,householdSource:state.householdSource||"Modelled",connectedHouseholds,residentialDaily,commercialDaily,totalDaily,annualKwh,participatingHouseholds,pvCapacityKwp,pvDailyKwh,batteryKwh,pvShare,electrification:electrification*100,efficiency:efficiency*100,pvCoverage:pvCoverage*100};
+ renderEnergy(state.energy);
+ const balance=pvDailyKwh-totalDaily;
+ $("interpretation").textContent="For "+fmt(pop,0)+" residents and "+fmt(households,0)+" "+(state.observedHouseholds!==null?"observed or aggregated":"modelled")+" households, this scenario estimates "+fmt(totalDaily/1000,2)+" MWh/day of electricity demand and "+fmt(pvDailyKwh/1000,2)+" MWh/day of potential PV generation. Indicative daily PV balance: "+(balance>=0?"+":"")+fmt(balance/1000,2)+" MWh/day. This is not measured NAWEC consumption.";
+ return state.energy;
+}
+function renderEnergy(e){
+ $("kPopulation").textContent=fmt(e.population,0);
+ $("kHouseholds").textContent=fmt(e.households,0);
+ $("hhUnit").textContent=state.observedHouseholds!==null?"Observed / census total":"Modelled from population";
+ $("kDemand").textContent=fmt(e.totalDaily/1000,2);
+ $("kAnnual").textContent=fmt(e.annualKwh/1e6,2);
+ $("kPV").textContent=fmt(e.pvDailyKwh/1000,2);
+ $("kCapacity").textContent=fmt(e.pvCapacityKwp/1000,2);
+ $("kStorage").textContent=fmt(e.batteryKwh/1000,2);
+ $("kShare").textContent=fmt(e.pvShare,1)+"%";
+ updateCharts(e);
+}
+
+/* ============================================================
+   CHARTS
+============================================================ */
+Chart.defaults.color="#9fb4c5";Chart.defaults.font.family="Inter,Segoe UI,Arial";Chart.defaults.font.size=9;
+function destroyChart(key){if(state.charts[key]){state.charts[key].destroy();state.charts[key]=null;}}
+function updateCharts(e){
+ ["energy","composition","coverage","population"].forEach(destroyChart);
+ if(!e)return;
+ const common={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:9,padding:10}}}};
+ state.charts.energy=new Chart($("energyChart"),{type:"bar",data:{labels:["Daily energy"],datasets:[
+  {label:"Demand (MWh/day)",data:[e.totalDaily/1000],backgroundColor:"#3987ff"},
+  {label:"Potential PV (MWh/day)",data:[e.pvDailyKwh/1000],backgroundColor:"#34d399"}]},
+  options:{...common,scales:{y:{beginAtZero:true,grid:{color:"#20384d"}}}}});
+ state.charts.composition=new Chart($("compositionChart"),{type:"doughnut",data:{labels:["Residential demand","Commercial / public demand"],datasets:[{data:[e.residentialDaily,e.commercialDaily],backgroundColor:["#3987ff","#f5a524"],borderColor:"#091725",borderWidth:2}]},options:{...common,cutout:"62%"}});
+ state.charts.coverage=new Chart($("coverageChart"),{type:"bar",data:{labels:["Electrification","PV participation","Efficiency improvement","PV share of demand"],datasets:[{label:"Scenario (%)",data:[e.electrification,e.pvCoverage,e.efficiency,e.pvShare],backgroundColor:["#35c6dc","#34d399","#f5a524","#a78bfa"]}]},options:{...common,indexAxis:"y",scales:{x:{beginAtZero:true,grid:{color:"#20384d"}}},plugins:{legend:{display:false}}}});
+ state.charts.population=new Chart($("populationChart"),{type:"bar",data:{labels:["Population","Households"],datasets:[{label:"People / households",data:[e.population,e.households],backgroundColor:["#35c6dc","#a78bfa"]}]},options:{...common,indexAxis:"y",scales:{x:{beginAtZero:true,grid:{color:"#20384d"}}},plugins:{legend:{display:false}}}});
+}
+
+/* ============================================================
+   ANALYSIS EXECUTION
+============================================================ */
+let activeRun=0;
+async function runAnalysis(){
+ const runId=++activeRun;
+ const area=selectedFeature();
+ if(!area){setMessage("No selected boundary available.");return;}
+ updateAreaLabels(area);drawSelected(area);
+ if(state.layers.buildings){map.removeLayer(state.layers.buildings);state.layers.buildings=null;}
+ state.buildingCount=0;state.buildings=null;$("kBuildings").textContent="—";
+ state.population=null;state.observedHouseholds=null;
+ setMessage("Retrieving repository population, census attributes and OSM buildings for "+featureName(area)+"...");
+ await Promise.allSettled([loadPopulationAndHouseholds(area),loadBuildings(area)]);
+ if(runId!==activeRun)return;
+ calculateEnergy();
+ setMessage("Analysis completed for "+featureName(area)+". Review source status and scenario assumptions.");
+}
+$("runBtn").addEventListener("click",runAnalysis);
+$("recalculateBtn").addEventListener("click",()=>{
+ calculateEnergy();setMessage("Energy scenario recalculated using the current assumptions.");
+});
+$("yearSelect").addEventListener("change",()=>{if(selectedFeature())runAnalysis();});
+
+/* ============================================================
+   RESET
+============================================================ */
+$("resetBtn").addEventListener("click",()=>{
+ activeRun++;
+ $("regionSelect").value="";$("districtSelect").value="";$("districtSelect").disabled=true;
+ state.selectedRegion=null;state.selectedDistrict=null;state.population=null;state.observedHouseholds=null;state.householdSource=null;state.buildings=null;state.buildingCount=0;
+ ["selected","buildings"].forEach(k=>{if(state.layers[k])map.removeLayer(state.layers[k]);state.layers[k]=null;});
+ $("kPopulation").textContent="—";$("kBuildings").textContent="—";clearEnergy();
+ setStatus("sPopulation","Waiting","waiting");setStatus("sHouseholds","Waiting","waiting");setStatus("sBuildings","Not requested","waiting");
+ updateAreaLabels(selectedFeature());
+ if(state.national)fitFeature(state.national.features[0]);
+ setMessage("Selection reset. Select a region or district to run another analysis.");
+});
+
+/* ============================================================
+   EXPORTS
+============================================================ */
+function downloadFile(name,content,mime){
+ const blob=new Blob([content],{type:mime}),url=URL.createObjectURL(blob);
+ const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportRecord(){
+ const area=selectedFeature();
+ return {
+  application:"GBoS GEOAI | Gambia Urban Energy Intelligence",
+  produced_by:"Ansu Singhateh",
+  unit:"GIS / Cartography Unit | Gambia Bureau of Statistics",
+  area:area?featureName(area):"The Gambia",
+  population_year:Number($("yearSelect").value),
+  population:state.population,
+  population_source:state.populationSource||"Unavailable",
+  household_total:state.energy?.households??null,
+  household_source:state.observedHouseholds!==null?state.householdSource:"Modelled from population / assumed household size",
+  osm_building_features:state.buildingCount,
+  nawec_consumption:"Not connected; no measured value supplied",
+  energy_scenario:state.energy,
+  area_km2:state.areaKm2,
+  assumptions:{
+   average_household_size:inputNumber("hhSize",1),
+   daily_kwh_per_household:inputNumber("dailyUse",0),
+   commercial_share_percent:inputNumber("commercialShare",0),
+   electrification_percent:inputNumber("electrification",0),
+   efficiency_improvement_percent:inputNumber("efficiency",0),
+   rooftop_solar_coverage_percent:inputNumber("pvCoverage",0),
+   pv_kwp_per_participating_household:inputNumber("pvSize",0),
+   solar_yield_kwh_per_kwp_day:inputNumber("solarYield",0),
+   battery_autonomy_hours:inputNumber("batteryHours",0)
+  },
+  data_note:"Energy indicators are scenario estimates, not measured electricity consumption or certified PED results."
+ };
+}
+$("csvBtn").addEventListener("click",()=>{
+ const r=exportRecord();
+ const rows=[
+  ["Indicator","Value","Unit / note"],
+  ["Area",r.area,""],
+  ["Population",r.population??"Unavailable","persons"],
+  ["Population source",r.population_source,""],
+  ["Households",r.household_total??"Unavailable",r.household_source],
+  ["OSM building features",r.osm_building_features,"mapped features"],
+  ["Area",r.area_km2??"Unavailable","km2"],
+  ["Daily electricity demand",state.energy?.totalDaily??"Unavailable","kWh/day"],
+  ["Annual electricity demand",state.energy?.annualKwh??"Unavailable","kWh/year"],
+  ["Potential PV generation",state.energy?.pvDailyKwh??"Unavailable","kWh/day"],
+  ["PV capacity",state.energy?.pvCapacityKwp??"Unavailable","kWp"],
+  ["Indicative battery storage",state.energy?.batteryKwh??"Unavailable","kWh"],
+  ["NAWEC consumption","Not connected","No measured data"]
+ ];
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");
+ downloadFile("Gambia_Urban_Energy_Analysis.csv",csv,"text/csv;charset=utf-8");
+});
+$("jsonBtn").addEventListener("click",()=>downloadFile("Gambia_Urban_Energy_Analysis.json",JSON.stringify(exportRecord(),null,2),"application/json"));
+$("geoBtn").addEventListener("click",()=>{
+ const f=selectedFeature();if(!f){setMessage("No selected area available for GeoJSON export.");return;}
+ const output={type:"FeatureCollection",features:[{...f,properties:{...(f.properties||{}),analysis_area:featureName(f),population:state.population,households:state.energy?.households??null,household_source:state.observedHouseholds!==null?state.householdSource:"Modelled",osm_building_count:state.buildingCount,area_km2:state.areaKm2}}]};
+ downloadFile("Selected_Area_Energy_Intelligence.geojson",JSON.stringify(output,null,2),"application/geo+json");
+});
+
+/* ============================================================
+   START APPLICATION
+============================================================ */
+(async function init(){
+ $("districtSelect").disabled=true;
+ setStatus("sNawec","Not connected","bad");
+ map.setView([13.45,-15.5],8);
+ await loadBoundaries();
+ updateAreaLabels(selectedFeature());
+ map.invalidateSize();
+})();
+</script>
+</body>
+</html>
+
